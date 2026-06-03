@@ -55,8 +55,8 @@ PID      PPID   PROCESS                PARENT                 PLEDGE  UNVEIL  W^
 89905    57770  pmv                    ksh                    PRESENT PRESENT ok      5
 80996    57770  ksh                    xfce4-terminal         PRESENT NONE    ok      3
 96837    1      xfce4-terminal         init                   NONE    NONE    ok      0
-20033    38074  firefox                firefox                PRESENT NONE    ok      3
-18100    20033  firefox                firefox                NONE    NONE    ok      0
+<PID>    38074  firefox                firefox                PRESENT NONE    ok      3
+18100    <PID>  firefox                firefox                NONE    NONE    ok      0
 79750    1      accounts-daemon        init                   NONE    NONE    ok      0
 ```
 
@@ -138,8 +138,8 @@ doas ./pmv
 # Show usage reference
 doas ./pmv --help
 
-# Filter by PID (show PID 20033 and its children)
-doas ./pmv --pid 20033
+# Filter by PID (show <PID> and its children)
+doas ./pmv --pid <PID>
 
 # Structured output
 doas ./pmv --format json --quiet
@@ -149,7 +149,7 @@ doas ./pmv --format csv --quiet
 doas ./pmv --diff
 
 # W^X memory scan with per-region detail and violation summary
-doas ./pmv --scan-wx 20033
+doas ./pmv --scan-wx <PID>
 ```
 
 ### Generated Artifacts
