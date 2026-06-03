@@ -36,7 +36,7 @@ void print_separator(void) {
 void print_header(void) {
     if (quiet_mode) return;
     printf(BOLD CYN "==========================================================================================\n");
-    printf("  PMV - OpenBSD Process Mitigation Viewer\n");
+    printf("  PMV - Process Mitigation Viewer\n");
     printf("==========================================================================================\n" RESET);
 }
 

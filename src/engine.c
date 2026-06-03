@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <sys/param.h>
 #include <sys/sysctl.h>
+#include <sys/user.h>
+#include <sys/proc.h>
 #include <sys/mman.h>
 #include <kvm.h>
 #include <fcntl.h>
