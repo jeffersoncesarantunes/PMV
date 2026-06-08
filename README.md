@@ -164,13 +164,13 @@ doas ./pmv --scan-wx <PID>
 
 ## ● Project in Action
 
-![System Scan](./Imagens/pmv-runtime-scan-v2.png)
+![System Scan](./Images/pmv-runtime-scan-v2.png)
 *1 - Interactive runtime state scan displaying the live process table and real-time security scoring.*
 
-![Granular PID Filter](./Imagens/pmv-pid-filter-v2.png)
+![Granular PID Filter](./Images/pmv-pid-filter-v2.png)
 *2 - Granular process filtering using the `--pid` flag, isolating target subtrees and dynamically recalculating scope-specific metrics.*
 
-![Automation and Diffs](./Imagens/pmv-diff-audit-v2.png)
+![Automation and Diffs](./Images/pmv-diff-audit-v2.png)
 *3 - Forensic automation workflow: quiet mode execution (`--quiet`) for data dumping and differential audit (`--diff`) against historical snapshots.*
 
 ---
@@ -208,7 +208,7 @@ PMV requires access to kernel memory via `libkvm(3)`, which demands elevated pri
 │   ├── ARCHITECTURE.md
 │   ├── BENCHMARKS.md
 │   └── SECURITY_MODEL.md
-├── Imagens/
+├── Images/
 │   ├── pmv1.png
 │   ├── pmv2.png
 │   └── pmv3.png
