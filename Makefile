@@ -5,7 +5,7 @@ TARGET = pmv
 SRC = src/main.c src/engine.c
 
 all: $(TARGET)
-	@echo " ✅ Build complete: $(TARGET)"
+	@echo "🧹 Build successful! 🟢"
 
 $(TARGET): $(SRC)
 	@$(CC) $(CFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
@@ -14,7 +14,7 @@ install: all
 	install -m 755 -o root -g wheel $(TARGET) /usr/local/bin/pmv
 
 clean:
+	@echo "🧹 Clean."
 	@rm -f $(TARGET)
-	@echo " 🧹 Cleaned up binary"
 
 .PHONY: all clean install
