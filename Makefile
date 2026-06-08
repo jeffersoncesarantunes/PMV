@@ -5,7 +5,7 @@ TARGET = pmv
 SRC = src/main.c src/engine.c
 
 all: $(TARGET)
-	@echo "🧹 Build successful! 🟢"
+	@echo "🟢 Build successful!"
 
 $(TARGET): $(SRC)
 	@$(CC) $(CFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
