@@ -9,15 +9,15 @@ pledge(2), unveil(2), and W^X enforcement are active per process.
 DESIGN PRINCIPLES
 -----------------
 
-1. Read-only. PMV does not interact with processes, does not use
-   ptrace(2), and does not modify kernel state.
+1. Read-only. No process interaction, no ptrace(2), no kernel state
+   modification.
 
-2. Kernel-exposed only. PMV reports only what the kernel exposes in
-   struct kinfo_proc. It does not infer, speculate, or simulate.
+2. Kernel-exposed only. PMV reports what the kernel puts in
+   struct kinfo_proc. No inference, no speculation, no simulation.
 
-3. Self-hardened. PMV applies pledge(2) and unveil(2) to itself at
-   runtime before processing any data, following the principle that
-   a security tool should practice what it preaches.
+3. Self-hardened. PMV calls pledge(2) and unveil(2) on itself before
+   processing anything. A security tool should practice what it
+   preaches.
 
 
 DATA FLOW
@@ -35,20 +35,20 @@ Step 1 - kvm_openfiles(NULL, NULL, NULL, KVM_NO_FILES, errbuf)
 
   Opens the live kernel memory image. KVM_NO_FILES tells kvm(3) that
   no crash dump or system file is needed -- PMV reads the running
-  kernel directly.  Returns NULL on failure (typically insufficient
-  privileges or /dev/kmum inaccessible).
+  kernel directly. Returns NULL on failure, usually because of
+  insufficient privileges or /dev/kmem being inaccessible.
 
 Step 2 - kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc),
                       &nprocs)
 
   Returns the full process table as an array of struct kinfo_proc.
-  KERN_PROC_ALL includes every process and kernel thread.  The kernel
-  allocates and fills the array; PMV only reads it.  NULL return
-  means kvm_getprocs(3) failed (unusual on a running system).
+  KERN_PROC_ALL grabs every process and kernel thread. The kernel
+  allocates and fills the array; PMV only reads it. A NULL return
+  means kvm_getprocs(3) failed, which is unusual on a running system.
 
 Step 3 - Flag inspection (engine.c:50-57)
 
-  Each kinfo_proc entry contains two flag fields relevant to PMV:
+  Each kinfo_proc entry has two flag fields PMV cares about:
 
     p_psflags bitmask:
       PS_PLEDGE    (0x00000004) - pledge(2) has been called
@@ -58,15 +58,15 @@ Step 3 - Flag inspection (engine.c:50-57)
     p_flag bitmask:
       P_CHROOT     (0x00004000) - process is chrooted
 
-  All four are booleans.  The kernel stores them as single-bit flags
-  in the process structure.  No depth.  No scope.  No policy detail.
-  This is a kernel ABI constraint, not a missing feature.
+  All four are booleans. Single-bit flags in the process structure.
+  No depth, no scope, no policy detail. This is a kernel ABI
+  constraint, not a missing feature.
 
 Step 4 - PPID resolution (engine.c:60-70)
 
   A second pass maps each process to its parent name by matching ppid
-  against pid entries in the same array.  Processes whose parent is
-  not found (kernel threads, orphaned processes) display as
+  against pid entries in the same array. Processes whose parent isn't
+  found (kernel threads, orphaned processes) show up as
   "(kernel/init)".
 
 Step 5 - Scoring (engine.c:80-89)
@@ -76,28 +76,28 @@ Step 5 - Scoring (engine.c:80-89)
 
   Range: -2 to 6.
 
-  The weights are not scientific -- they reflect the relative
-  impact of each mitigation:
+  The weights aren't scientific -- they reflect the relative impact
+  of each mitigation:
 
-    +3  pledge(2) restricts the syscall surface, which is the
-        broadest and most impactful mitigation on OpenBSD.
+    +3  pledge(2) restricts the syscall surface. Broadest, most
+        impactful mitigation on OpenBSD.
 
-    +2  unveil(2) restricts filesystem access, a narrower but
-        still valuable constraint.
+    +2  unveil(2) restricts filesystem access. Narrower, but still
+        valuable.
 
     +1  chroot adds filesystem containment on top of unveil.
 
-    -2  wxneeded means the binary requested W^X execption, which
+    -2  wxneeded means the binary asked for a W^X exception, which
         implies writable+executable memory pages exist.
 
-  The score exists to give a quick visual signal.  A low score does
-  not necessarily mean a process is compromised -- many OpenBSD base
-  system daemons do not use pledge(2) or unveil(2).
+  The score is a quick visual signal. A low score doesn't mean a
+  process is compromised -- plenty of OpenBSD base system daemons
+  don't use pledge(2) or unveil(2).
 
 Step 6 - Self-hardening (main.c:227-228)
 
-  After collecting process data but before producing any output,
-  PMV locks itself down:
+  After collecting process data but before producing output, PMV
+  locks itself down:
 
     unveil("/dev", "r")           -- libkvm reads /dev/kmem
     unveil("output.json", "rwc")  -- JSON export file
@@ -115,12 +115,12 @@ Step 6 - Self-hardening (main.c:227-228)
     vminfo  -- sysctl KERN_PROC_VMMAP access (used by --scan-wx)
     unveil  -- allow the unveil syscall (already used above)
 
-  The unveil(2) calls happen before pledge(2) because pledge(2)
-  restrictions take effect immediately, while unveil(2) requires
-  all path entries to be set before the NULL terminator.
+  The unveil(2) calls come before pledge(2) because pledge(2)
+  restrictions take effect immediately, while unveil(2) needs all
+  path entries set before the NULL terminator.
 
   If either pledge(2) or unveil(2) fails, PMV calls err(3) and
-  exits -- it will not run unhardened.
+  exits. It won't run unhardened.
 
 
 OUTPUT FORMATS
@@ -131,20 +131,20 @@ Terminal (default)
   Color-coded table with per-process mitigation columns:
   PID, PPID, PROCESS, PARENT, PLEDGE, UNVEIL, W^X, SCORE.
   Blue rows for native processes, magenta for kernel threads
-  (PID < 100).  Paged every 20 lines via getchar().
-  Summary block at end: total, pledge count, unveil count,
+  (PID < 100). Paged every 20 lines via getchar(). Summary
+  block at the end: total processes, pledge count, unveil count,
   W^X violations.
 
 JSON (--format json)
 
-  Structured array of objects.  Each object contains pid, ppid,
+  Structured array of objects. Each object contains pid, ppid,
   name, ppname, pledge (bool), unveil (bool), wxneeded (bool),
   chrooted (bool), context ("NATIVE" or "KERNEL"), score.
   In quiet mode (--quiet), writes to output.json.
 
 CSV (--format csv)
 
-  Header row + one line per process.  Same fields as JSON.
+  Header row plus one line per process. Same fields as JSON.
   In quiet mode, writes to output.csv.
 
 
@@ -152,7 +152,7 @@ DIFF MODE (--diff)
 ------------------
 
 PMV saves a snapshot file (.pmv_snapshot) on every normal run
-(non-diff).  The format is pipe-delimited:
+(anything that isn't --diff). The format is pipe-delimited:
 
     PID|NAME|HAS_PLEDGE|HAS_UNVEIL|WXNEEDED
 
@@ -160,79 +160,78 @@ When --diff is passed, PMV loads the previous snapshot before
 running the current scan, then compares and displays:
 
   ~  process whose mitigation state changed
-  +  new process since last snapshot
+  +  new process since the last snapshot
   -  process that exited
 
-The snapshot is not updated when --diff is used.  This lets the
-user run repeated comparisons against the same baseline.
+The snapshot doesn't update when --diff is used. This lets you
+run repeated comparisons against the same baseline.
 
-The snapshot file is plain text and unauthenticated.  It is not
-suitable as an evidence chain-of-custody mechanism without
-external integrity verification (e.g., sha256(1)).
+The snapshot is plain text and unauthenticated. Not suitable as
+a chain-of-custody mechanism without external integrity verification
+(e.g., sha256(1)).
 
 
 W^X MEMORY SCAN (--scan-wx <PID>)
 ----------------------------------
 
 Uses sysctl(2) with KERN_PROC_VMMAP to enumerate all memory
-regions for a single process.  Reports:
+regions for a single process. Reports:
 
   - Start and end address of each mapped region (hex)
   - Protection flags (rwx triple)
   - W+X violations highlighted in red
 
 KERN_PROC_VMMAP is restricted by default on OpenBSD to prevent
-ASLR bypass via userspace.  On a stock installation, PMV prints
+ASLR bypass from userspace. On a stock install, PMV prints:
 
   [!] VMMAP sysctl failed for PID X: KERN_PROC_VMMAP is restricted
 
-To enable deep memory scanning, set the kernel knob:
+To enable deep memory scanning, flip the kernel knob:
 
   doas sysctl kern.allowkmem=1
 
-This is recommended only in lab environments for testing purposes.
-Production systems should leave kern.allowkmem at its default (0).
+Only do this in a lab environment. Production systems should leave
+kern.allowkmem at its default (0).
 
 
 LIMITATIONS
 -----------
 
-1. Pledge/unveil are booleans.  The OpenBSD kernel exposes whether
+1. Pledge/unveil are booleans. The OpenBSD kernel exposes whether
    pledge(2) and unveil(2) were called, but not which promises were
-   pledged or which paths were unveiled.  PMV cannot report what
-   the kernel does not provide.  Any tool claiming to show pledge
-   promise depth or unveil path scope is either guessing or using
+   pledged or which paths were unveiled. PMV can't report what the
+   kernel doesn't provide. Any tool claiming to show pledge promise
+   depth or unveil path scope is either guessing or using
    ktrace(1)-style runtime tracing, not kernel-exposed state.
 
-2. No runtime analysis.  PMV reads a point-in-time snapshot of
-   process flags from kvm(3).  It does not trace syscalls, profile
-   runtime behavior, or detect policy violations during execution.
-   For syscall tracing, use ktrace(1) or btrace(8).
+2. No runtime analysis. PMV reads a point-in-time snapshot from
+   kvm(3). It doesn't trace syscalls, profile runtime behavior, or
+   detect policy violations during execution. For syscall tracing,
+   use ktrace(1) or btrace(8).
 
-3. PS_WXNEEDED vs. actual W^X pages.  The PS_WXNEEDED flag in
-   kinfo_proc indicates the binary requested a W^X exception via
-   mimmutable(2) or similar.  It is NOT a per-region memory map.
-   The separate --scan-wx flag uses KERN_PROC_VMMAP for actual
-   per-region analysis, but requires kern.allowkmem=1.
+3. PS_WXNEEDED vs. actual W^X pages. PS_WXNEEDED in kinfo_proc
+   means the binary requested a W^X exception via mimmutable(2) or
+   similar. It is NOT a per-region memory map. The separate --scan-wx
+   flag uses KERN_PROC_VMMAP for actual per-region analysis, but
+   needs kern.allowkmem=1.
 
-4. Snapshot integrity.  The .pmv_snapshot file is plain text and
-   is not cryptographically signed.  If tampered with, --diff will
-   produce misleading results.  This is acceptable for ad-hoc
-   investigations but not for forensic chain-of-custody.
+4. Snapshot integrity. The .pmv_snapshot file is plain text with no
+   cryptographic signature. If tampered with, --diff will produce
+   misleading results. Fine for ad-hoc investigations, but not for
+   forensic chain-of-custody.
 
-5. Performance under load.  kvm_getprocs(3) returns a consistent
-   point-in-time snapshot.  Under extreme process churn, some PIDs
-   may appear or disappear between the kvm_getprocs(3) call and the
-   PPID resolution pass.  This is a inherent race condition in any
-   tool that reads /proc or kvm(3).  PMV handles this gracefully
-   (unknown parent -> "(kernel/init)") but users should be aware
-   that the process table is not a static artifact.
+5. Performance under load. kvm_getprocs(3) returns a point-in-time
+   snapshot. Under extreme process churn, PIDs can appear or
+   disappear between the kvm_getprocs(3) call and the PPID
+   resolution pass. That's an inherent race in anything that reads
+   /proc or kvm(3). PMV handles it gracefully (unknown parent ->
+   "(kernel/init)"), but the process table isn't a static artifact.
 
 
 PORTABILITY
 -----------
 
-OpenBSD only.  PMV depends on:
+OpenBSD only. PMV depends on:
 
   kvm(3)                     -- OpenBSD-specific kernel memory interface
   struct kinfo_proc          -- OpenBSD kernel ABI
@@ -240,10 +239,10 @@ OpenBSD only.  PMV depends on:
   PS_WXNEEDED, P_CHROOT      -- OpenBSD-specific process flags
   KERN_PROC_VMMAP sysctl     -- OpenBSD-specific sysctl MIB
 
-Not portable to Linux, FreeBSD, NetBSD, or any other system.
-This is intentional -- each BSD variant exposes process mitigation
-state differently, and PMV is designed specifically for the OpenBSD
-security model.
+Won't work on Linux, FreeBSD, NetBSD, or any other system. That's
+intentional -- every BSD exposes process mitigation state differently,
+and PMV targets the OpenBSD security model specifically.
+
 
 SEE ALSO
 --------

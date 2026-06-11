@@ -300,7 +300,7 @@ int main(int argc, char *argv[]) {
     int oldp_count = 0;
     ProcessInfo *oldp = NULL;
     if (diff_mode) oldp = load_snapshot(&oldp_count);
-    if (unveil("/dev", "r") == -1 || unveil(NULL, NULL) == -1) err(1, "unveil");
+    if (unveil(".", "rwc") == -1 || unveil("/dev", "r") == -1 || unveil(NULL, NULL) == -1) err(1, "unveil");
     if (pledge("stdio rpath wpath cpath ps vminfo unveil", NULL) == -1) err(1, "pledge");
     if (out_format == NONE && !quiet_mode) {
         if (target_pid > 0) printf("\n" BOLD "[+] Filtered PID %d\n" RESET, target_pid);

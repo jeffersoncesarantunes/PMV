@@ -1,19 +1,14 @@
-# Binary
 pmv
 
-# Object files
 *.o
 
-# Runtime artifacts
 output.json
 output.csv
 .pmv_snapshot
 
-# Editor temporaries
 *~
 *.swp
 *.bak
 *.tmp
 
-# Sisyphus workspace
 .sisyphus/
