@@ -209,9 +209,9 @@ PMV needs kernel memory access via `libkvm(3)`, which means elevated privileges.
 │   ├── BENCHMARKS.md
 │   └── SECURITY_MODEL.md
 ├── Images/
-│   ├── pmv1.png
-│   ├── pmv2.png
-│   └── pmv3.png
+│   ├── pmv-runtime-scan-v2.png
+│   ├── pmv-pid-filter-v2.png
+│   └── pmv-diff-audit-v2.png
 ├── include/
 │   └── pmv.h
 ├── src/

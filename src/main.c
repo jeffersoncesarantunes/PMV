@@ -143,8 +143,12 @@ static const char *snapshot_path(void) {
 
 static int save_snapshot(const ProcessInfo *plist, int count) {
     const char *path = snapshot_path();
-    int fd = open(path, O_WRONLY | O_CREAT | O_NOFOLLOW | O_CLOEXEC, 0600);
-    if (fd == -1) return -1;
+    int fd = open(path, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0600);
+    if (fd == -1) {
+        unlink(path);
+        fd = open(path, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0600);
+        if (fd == -1) return -1;
+    }
     FILE *f = fdopen(fd, "w");
     if (!f) { close(fd); return -1; }
     for (int i = 0; i < count; i++) {
