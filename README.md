@@ -205,18 +205,18 @@ PMV needs kernel memory access via `libkvm(3)`, which means elevated privileges.
 
 ```text
 ├── docs/
-│   ├── ARCHITECTURE.md
-│   ├── BENCHMARKS.md
-│   └── SECURITY_MODEL.md
+│   ├── ARCHITECTURE.md        System architecture and design
+│   ├── BENCHMARKS.md          Performance benchmarks
+│   └── SECURITY_MODEL.md      Security threat model
 ├── Images/
-│   ├── pmv-runtime-scan-v2.png
-│   ├── pmv-pid-filter-v2.png
-│   └── pmv-diff-audit-v2.png
+│   ├── pmv-runtime-scan-v2.png  Runtime scan demonstration
+│   ├── pmv-pid-filter-v2.png    PID filter demonstration
+│   └── pmv-diff-audit-v2.png    Diff audit demonstration
 ├── include/
-│   └── pmv.h
+│   └── pmv.h                  Main header and definitions
 ├── src/
-│   ├── engine.c
-│   └── main.c
+│   ├── engine.c               Core scanning engine
+│   └── main.c                 CLI entry point
 ├── .gitignore
 ├── LICENSE
 ├── Makefile
