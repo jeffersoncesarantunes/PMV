@@ -82,8 +82,10 @@ void export_json_manual(ProcessInfo *processes, int count, const char *filename)
     FILE *f = stdout;
     int needs_close = 0;
     if (filename != NULL) {
-        f = fopen(filename, "w");
-        if (!f) return;
+        int fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW | O_CLOEXEC, 0644);
+        if (fd == -1) return;
+        f = fdopen(fd, "w");
+        if (!f) { close(fd); return; }
         needs_close = 1;
     }
     fputs("[\n", f);
@@ -115,8 +117,10 @@ void export_csv(ProcessInfo *processes, int count, const char *filename) {
     FILE *f = stdout;
     int needs_close = 0;
     if (filename != NULL) {
-        f = fopen(filename, "w");
-        if (!f) return;
+        int fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW | O_CLOEXEC, 0644);
+        if (fd == -1) return;
+        f = fdopen(fd, "w");
+        if (!f) { close(fd); return; }
         needs_close = 1;
     }
     fprintf(f, "pid,ppid,name,ppname,pledge,unveil,wxneeded,chrooted,context,score\n");
@@ -143,21 +147,21 @@ static const char *snapshot_path(void) {
 
 static int save_snapshot(const ProcessInfo *plist, int count) {
     const char *path = snapshot_path();
-    int fd = open(path, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0600);
-    if (fd == -1) {
-        unlink(path);
-        fd = open(path, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0600);
-        if (fd == -1) return -1;
-    }
+    char tmp_path[512];
+    int n = snprintf(tmp_path, sizeof(tmp_path), "%s.XXXXXX", path);
+    if (n < 0 || (size_t)n >= sizeof(tmp_path)) return -1;
+    int fd = mkstemp(tmp_path);
+    if (fd == -1) return -1;
     FILE *f = fdopen(fd, "w");
-    if (!f) { close(fd); return -1; }
+    if (!f) { close(fd); unlink(tmp_path); return -1; }
     for (int i = 0; i < count; i++) {
         fprintf(f, "%d|%s|%d|%d|%d\n",
             plist[i].pid, plist[i].name,
             plist[i].has_pledge, plist[i].has_unveil,
             plist[i].wxneeded);
     }
-    if (fclose(f) != 0) return -1;
+    if (fclose(f) != 0) { unlink(tmp_path); return -1; }
+    if (rename(tmp_path, path) == -1) { unlink(tmp_path); return -1; }
     return 0;
 }
 
