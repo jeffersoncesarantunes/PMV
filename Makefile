@@ -1,6 +1,6 @@
 CC = cc
 CFLAGS = -Wall -Wextra -O2 -fstack-protector-strong -D_FORTIFY_SOURCE=2 -fPIE -I./include -I/usr/local/include
-LDFLAGS = -lkvm -pie -Wl,-z,relro,-z,now
+LDFLAGS = -lkvm -pie -Wl,-z,relro,-z,now -Wl,-z,noexecstack
 TARGET = pmv
 SRC = src/main.c src/engine.c
 
