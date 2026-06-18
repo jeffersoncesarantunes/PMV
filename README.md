@@ -2,6 +2,7 @@
 
 Lightweight OpenBSD process mitigation visibility tool — looks at pledge, unveil, and W^X status per process.
 
+
 [![Platform-OpenBSD](https://img.shields.io/badge/Platform-OpenBSD-FBD12B?style=flat-square&logo=openbsd&logoColor=black)](https://www.openbsd.org)
 [![Language-C11](https://img.shields.io/badge/Language-C11-1793D1?style=flat-square&logo=c&logoColor=white)](https://gcc.gnu.org/)
 [![License-MIT](https://img.shields.io/badge/License-MIT-EE0000?style=flat-square&logo=license&logoColor=white)](LICENSE)
@@ -9,11 +10,13 @@ Lightweight OpenBSD process mitigation visibility tool — looks at pledge, unve
 [![Tested-On](https://img.shields.io/badge/Tested%20on-OpenBSD%207.9-blue?style=flat-square)](https://www.openbsd.org/79.html)
 [![Domain](https://img.shields.io/badge/Domain-Digital%20Forensics-lightgrey?style=flat-square)](./docs/SECURITY_MODEL.md)
 
+
 ---
 
 ## Etymology & Origin
 
 **PMV** stands for **P**rocess **M**itigation **V**iewer. The name was deliberate — this is a viewer, not an auditor, not a security scanner, not a vulnerability finder. It shows whether kernel mitigations are present per process and is upfront about what the kernel does and doesn't expose.
+
 
 ---
 
@@ -27,9 +30,11 @@ All classification comes from kernel-reported state. PMV doesn't do runtime anal
 
 Let's be clear about scope: PMV doesn't try to replace `ktrace(1)`, `btrace(8)`, or any other OpenBSD introspection tool. It reads what the kernel exposes and formats it readably. The kernel tells you whether `pledge(2)` and `unveil(2)` were called — not which promises were made or which paths were unveiled. PMV doesn't pretend otherwise. That's a platform constraint, not a missing feature.
 
+
 ---
 
 ## Features
+
 
 * Kernel process table inspection via `libkvm`
 * `pledge(2)` state detection (called / not called)
@@ -44,6 +49,7 @@ Let's be clear about scope: PMV doesn't try to replace `ktrace(1)`, `btrace(8)`,
 * Diff mode (`--diff`) — compare current state against a previous snapshot
 * W^X memory scan (`--scan-wx`) — per-region protection analysis with violation summary
 * Built-in help (`--help` / `-h`) — usage reference for all flags
+
 
 ---
 
@@ -62,11 +68,13 @@ PID      PPID   PROCESS                PARENT                 PLEDGE  UNVEIL  W^
 
 *Output reflects kernel-reported mitigation state. `PRESENT` confirms the syscall was called — it does not indicate policy depth or scope.*
 
+
 ---
 
 ## How It Works
 
 PMV uses **libkvm** to access the kernel process table in read-only mode. For each process it reads `struct kinfo_proc` and checks:
+
 
 * Whether `pledge(2)` was called (`p_psflags & PS_PLEDGE`)
 * Whether `unveil(2)` was called (`p_psflags & PS_UNVEIL`)
@@ -74,6 +82,7 @@ PMV uses **libkvm** to access the kernel process table in read-only mode. For ea
 * Whether the process is chrooted (`p_flag & P_CHROOT`)
 
 **Known limitation:** the kernel only exposes a boolean for pledge and unveil — presence or absence. The specific promises passed to `pledge(2)` or paths passed to `unveil(2)` aren't available. PMV can't report what the kernel doesn't provide.
+
 
 ---
 
@@ -93,6 +102,7 @@ Each process gets a score from **-2 to 6** based on what the kernel reports:
 | 4 – 6 | Green | Multiple mitigations detected |
 | 1 – 3 | Yellow | Partial mitigation |
 | ≤ 0 | Red | No mitigations detected |
+
 
 ---
 
@@ -119,6 +129,7 @@ doas sysctl kern.allowkmem=1
 ```
 
 **Technical context:** The kernel uses internal bitmask flags in the process structure (`p_psflags`) to track whether a mitigation is active. It doesn't maintain a verbose string array for userland about which paths were unveiled or which promises were requested. `PRESENT` means the binary calls pledge or unveil. That's all the kernel gives us.
+
 
 ---
 
@@ -160,18 +171,23 @@ doas ./pmv --scan-wx <PID>
 | `output.csv` | Tabular export (spreadsheet-friendly) |
 | `.pmv_snapshot` | Internal diff snapshot (auto-generated) |
 
+
 ---
 
 ## Project in Action
 
 ![System Scan](./Images/pmv-runtime-scan-v2.png)
+
 *Interactive runtime state scan showing the live process table and real-time security scoring.*
 
 ![Granular PID Filter](./Images/pmv-pid-filter-v2.png)
+
 *Process filtering with `--pid`, targeting specific subtrees and recalculating scope-specific metrics.*
 
 ![Automation and Diffs](./Images/pmv-diff-audit-v2.png)
+
 *Forensic automation: quiet mode (`--quiet`) for data dumping and differential audit (`--diff`) against historical snapshots.*
+
 
 ---
 
@@ -179,16 +195,19 @@ doas ./pmv --scan-wx <PID>
 
 PMV is designed for safe forensic use:
 
+
 * Read-only kernel access via `libkvm`
 * No process interaction or `ptrace(2)` usage
 * Self-hardened with `pledge(2)` and `unveil(2)` at runtime
 * Graceful handling of restricted entries
+
 
 ---
 
 ## Deployment
 
 ### Requirements
+
 
 * OpenBSD (release or -current)
 * libkvm
@@ -199,33 +218,43 @@ PMV is designed for safe forensic use:
 
 PMV needs kernel memory access via `libkvm(3)`, which means elevated privileges. The recommended way to run it is with `doas`. `make install` puts the binary in place **without** setuid root (`-m 755`). This follows OpenBSD's philosophy of explicit privilege elevation rather than implicit setuid escalation. If you want setuid, adjust the mode manually after install.
 
+
 ---
 
 ## Repository Structure
 
 ```text
 ├── docs/
-│   ├── ARCHITECTURE.md        System architecture and design
-│   ├── BENCHMARKS.md          Performance benchmarks
-│   └── SECURITY_MODEL.md      Security threat model
+│   ├── ARCHITECTURE.md                    System architecture and design
+│   ├── BENCHMARKS.md                      Performance benchmarks
+│   └── SECURITY_MODEL.md                  Security threat model
+
 ├── Images/
-│   ├── pmv-runtime-scan-v2.png  Runtime scan demonstration
-│   ├── pmv-pid-filter-v2.png    PID filter demonstration
-│   └── pmv-diff-audit-v2.png    Diff audit demonstration
+│   ├── pmv-runtime-scan-v2.png            Runtime scan demonstration
+│   ├── pmv-pid-filter-v2.png              PID filter demonstration
+│   └── pmv-diff-audit-v2.png              Diff audit demonstration
+
 ├── include/
-│   └── pmv.h                  Main header and definitions
+│   └── pmv.h                              Main header and definitions
+
 ├── src/
-│   ├── engine.c               Core scanning engine
-│   └── main.c                 CLI entry point
+│   ├── engine.c                           Core scanning engine
+│   └── main.c                             CLI entry point
+
 ├── .gitignore
+
 ├── LICENSE
+
 ├── Makefile
+
 └── README.md
 ```
+
 
 ---
 
 ## Tech Stack
+
 
 * **Language:** C (C11)
 * **Kernel Interface:** libkvm
@@ -233,9 +262,11 @@ PMV needs kernel memory access via `libkvm(3)`, which means elevated privileges.
 * **Build Tool:** BSD make
 * **Platform:** OpenBSD
 
+
 ---
 
 ## Roadmap
+
 
 * Core mitigation state engine
 * `pledge(2)` / `unveil(2)` visibility
@@ -247,6 +278,7 @@ PMV needs kernel memory access via `libkvm(3)`, which means elevated privileges.
 * Per-process scoring
 * Diff mode (`--diff`) — change detection across runs
 
+
 ---
 
 ## Documentation
@@ -254,6 +286,7 @@ PMV needs kernel memory access via `libkvm(3)`, which means elevated privileges.
 [![Docs-Architecture](https://img.shields.io/badge/Architecture-Design-004080?style=flat-square\&logo=openbsd\&logoColor=white)](./docs/ARCHITECTURE.md)
 [![Docs-Security](https://img.shields.io/badge/Security--Model-444444?style=flat-square\&logo=openbsd\&logoColor=white)](./docs/SECURITY_MODEL.md)
 [![Docs-Benchmarks](https://img.shields.io/badge/Performance--Benchmarks-1793D1?style=flat-square\&logo=speedtest\&logoColor=white)](./docs/BENCHMARKS.md)
+
 
 ---
 
