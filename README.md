@@ -224,32 +224,32 @@ PMV needs kernel memory access via `libkvm(3)`, which means elevated privileges.
 ## Repository Structure
 
 ```text
-├── docs/
-│   ├── ARCHITECTURE.md                    System architecture and design
-│   ├── BENCHMARKS.md                      Performance benchmarks
-│   └── SECURITY_MODEL.md                  Security threat model
++-- docs/
+|   +-- ARCHITECTURE.md                    System architecture and design
+|   +-- BENCHMARKS.md                      Performance benchmarks
+|   \-- SECURITY_MODEL.md                  Security threat model
 
-├── Images/
-│   ├── pmv-runtime-scan-v2.png            Runtime scan demonstration
-│   ├── pmv-pid-filter-v2.png              PID filter demonstration
-│   └── pmv-diff-audit-v2.png              Diff audit demonstration
++-- Images/
+|   +-- pmv-runtime-scan-v2.png            Runtime scan demonstration
+|   +-- pmv-pid-filter-v2.png              PID filter demonstration
+|   \-- pmv-diff-audit-v2.png              Diff audit demonstration
 
-├── include/
-│   └── pmv.h                              Main header and definitions
++-- include/
+|   \-- pmv.h                              Main header and definitions
 
-├── src/
-│   ├── engine.c                           Core scanning engine
-│   └── main.c                             CLI entry point
++-- src/
+|   +-- engine.c                           Core scanning engine
+|   \-- main.c                             CLI entry point
 
-├── .gitignore
++-- .gitignore
 
-├── LICENSE
++-- LICENSE
 
-├── Makefile
++-- Makefile
 
-├── SECURITY.md
++-- SECURITY.md
 
-└── README.md
+\-- README.md
 ```
 
 
