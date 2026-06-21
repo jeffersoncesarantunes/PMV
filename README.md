@@ -247,6 +247,8 @@ PMV needs kernel memory access via `libkvm(3)`, which means elevated privileges.
 
 ├── Makefile
 
+├── SECURITY.md
+
 └── README.md
 ```
 
