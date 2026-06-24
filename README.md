@@ -6,9 +6,9 @@ Lightweight OpenBSD process mitigation visibility tool — looks at pledge, unve
 [![Platform-OpenBSD](https://img.shields.io/badge/Platform-OpenBSD-FBD12B?style=flat-square&logo=openbsd&logoColor=black)](https://www.openbsd.org)
 [![Language-C11](https://img.shields.io/badge/Language-C11-1793D1?style=flat-square&logo=c&logoColor=white)](https://gcc.gnu.org/)
 [![License-MIT](https://img.shields.io/badge/License-MIT-EE0000?style=flat-square&logo=license&logoColor=white)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Active-00FF41?style=flat-square)](#-roadmap)
-[![Tested-On](https://img.shields.io/badge/Tested%20on-OpenBSD%207.9-blue?style=flat-square)](https://www.openbsd.org/79.html)
-[![Domain](https://img.shields.io/badge/Domain-Digital%20Forensics-lightgrey?style=flat-square)](./docs/SECURITY_MODEL.md)
+[![Status](https://img.shields.io/badge/Status-Active-00A86B?style=flat-square)](#-roadmap)
+[![Tested-On](https://img.shields.io/badge/Tested%20on-OpenBSD%207.9-1793D1?style=flat-square)](https://www.openbsd.org/79.html)
+[![Domain](https://img.shields.io/badge/Domain-Digital%20Forensics-444444?style=flat-square)](./docs/SECURITY_MODEL.md)
 
 
 ---
