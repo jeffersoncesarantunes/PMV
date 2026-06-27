@@ -1,0 +1,36 @@
+.TH PMV 1 "2026-06-27" "PMV" "User Commands"
+.SH NAME
+pmv \- OpenBSD process mitigation viewer
+.SH SYNOPSIS
+.B pmv
+[\fI--watch\fR]
+[\fI--json\fR]
+[\fI--help\fR]
+.SH DESCRIPTION
+PMV displays per-process security mitigation status on OpenBSD.
+It reads kernel process information via the kvm(3) interface
+(kernel memory) and shows pledge(2), unveil(2), W^X, chroot,
+and ASLR status for each running process.
+.SH OPTIONS
+.TP
+.B \--watch
+Continuous monitoring mode with live updates.
+.TP
+.B \--json
+Export process mitigation data in JSON format.
+.TP
+.B \--help
+Display this help message and exit.
+.SH FILES
+.TP
+.I .pmv_snapshot
+Persistent state file for snapshot tracking.
+.SH EXIT STATUS
+.B 0
+on success, 1 on error.
+.SH AUTHOR
+Jefferson Cesar Antunes
+.SH SEE ALSO
+.BR kvm (3),
+.BR pledge (2),
+.BR unveil (2)
