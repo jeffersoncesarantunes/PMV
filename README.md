@@ -290,10 +290,3 @@ PMV needs kernel memory access via `libkvm(3)`, which means elevated privileges.
 [![Docs-Benchmarks](https://img.shields.io/badge/Performance--Benchmarks-1793D1?style=flat-square\&logo=speedtest\&logoColor=white)](./docs/BENCHMARKS.md)
 
 
----
-
-## License
-
-[![License-MIT](https://img.shields.io/badge/License-MIT-EE0000?style=flat-square\&logo=opensourceinitiative\&logoColor=white)](./LICENSE)
-
-*This project is licensed under the MIT License.*
