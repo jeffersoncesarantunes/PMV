@@ -282,9 +282,6 @@ PMV needs kernel memory access via `libkvm(3)`, which means elevated privileges.
 - [x] Structured export (JSON / CSV)
 - [x] Diff mode (`--diff`) — change detection across runs
 - [x] Silent mode (`--quiet`)
-- [ ] Real-time watch mode (`--watch`)
-- [ ] Container-aware process detection (OpenBSD vmm/jail)
-- [ ] Ecosystem integration (SYNTROPY / K-Scanner)
 
 
 ---
