@@ -269,16 +269,22 @@ PMV needs kernel memory access via `libkvm(3)`, which means elevated privileges.
 
 ## Roadmap
 
-
-* Core mitigation state engine
-* `pledge(2)` / `unveil(2)` visibility
-* Kernel state extraction via `libkvm(3)`
-* JSON/CSV export
-* Silent mode (`--quiet` / `-q`)
-* PID filtering (`--pid`)
-* Parent process mapping (PPID)
-* Per-process scoring
-* Diff mode (`--diff`) — change detection across runs
+- [x] Core mitigation state engine
+- [x] `pledge(2)` / `unveil(2)` presence detection
+- [x] W^X-related policy indicators per process
+- [x] Kernel state extraction via `libkvm(3)` / `struct kinfo_proc`
+- [x] Parent process mapping (PPID)
+- [x] Per-process security scoring (-2 to 6)
+- [x] PID filtering (`--pid`)
+- [x] W^X memory region scan (`--scan-wx`)
+- [x] Self-hardening at runtime (`pledge` + `unveil`)
+- [x] Self-audit on startup (W^X integrity check)
+- [x] Structured export (JSON / CSV)
+- [x] Diff mode (`--diff`) — change detection across runs
+- [x] Silent mode (`--quiet`)
+- [ ] Real-time watch mode (`--watch`)
+- [ ] Container-aware process detection (OpenBSD vmm/jail)
+- [ ] Ecosystem integration (SYNTROPY / K-Scanner)
 
 
 ---
