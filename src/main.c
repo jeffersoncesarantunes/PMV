@@ -18,6 +18,8 @@
 #define BOLD   "\x1b[1m"
 #define RESET  "\x1b[0m"
 
+#define PMV_VERSION "1.0.0"
+
 #define SNAPSHOT_FILE ".pmv_snapshot"
 
 enum OutputFormat { NONE, JSON, CSV };
@@ -78,7 +80,7 @@ static void csv_field(FILE *f, const char *s) {
     }
 }
 
-void export_json_manual(ProcessInfo *processes, int count, const char *filename) {
+static void export_json_manual(const ProcessInfo *processes, int count, const char *filename) {
     FILE *f = stdout;
     int needs_close = 0;
     if (filename != NULL) {
@@ -113,7 +115,7 @@ void export_json_manual(ProcessInfo *processes, int count, const char *filename)
     }
 }
 
-void export_csv(ProcessInfo *processes, int count, const char *filename) {
+static void export_csv(const ProcessInfo *processes, int count, const char *filename) {
     FILE *f = stdout;
     int needs_close = 0;
     if (filename != NULL) {
@@ -258,15 +260,17 @@ static void print_diff(const ProcessInfo *oldp, int oldc, const ProcessInfo *new
 }
 
 static void usage(void) {
-    fprintf(stderr, "Usage: pmv [options]\n\nOptions:\n  -h, --help           Show help\n  -q, --quiet          Suppress output\n  --pid <PID>          Filter PID\n  --format <json|csv>  Export\n  --diff               Compare snapshot\n  --scan-wx <PID>      Scan memory\n");
+    fprintf(stderr, "Usage: pmv [options]\n\nOptions:\n  -h, --help           Show help\n  --version            Show version\n  -q, --quiet          Suppress output\n  --pid <PID>          Filter PID\n  --format <json|csv>  Export\n  --diff               Compare snapshot\n  --scan-wx <PID>      Scan memory\n");
 }
 
 int main(int argc, char *argv[]) {
+    setprogname(argv[0]);
     enum OutputFormat out_format = NONE;
     int target_wx_pid = 0, diff_mode = 0;
     pid_t target_pid = 0;
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) { usage(); return 0; }
+        else if (strcmp(argv[i], "--version") == 0) { puts("pmv " PMV_VERSION); return 0; }
         else if (strcmp(argv[i], "--quiet") == 0 || strcmp(argv[i], "-q") == 0) { quiet_mode = 1; }
         else if (strcmp(argv[i], "--diff") == 0) { diff_mode = 1; }
         else if (strcmp(argv[i], "--scan-wx") == 0) {

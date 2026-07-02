@@ -1,30 +1,53 @@
-.TH PMV 1 "2026-06-27" "PMV" "User Commands"
+.TH PMV 1 "2026-07-02" "PMV" "User Commands"
 .SH NAME
 pmv \- OpenBSD process mitigation viewer
 .SH SYNOPSIS
 .B pmv
-[\fI--watch\fR]
-[\fI--json\fR]
-[\fI--help\fR]
+[\fB--help\fR|\fB-h\fR]
+[\fB--version\fR]
+[\fB--quiet\fR|\fB-q\fR]
+[\fB--pid\fR \fIPID\fR]
+[\fB--format\fR \fIjson\fR|\fIcsv\fR]
+[\fB--diff\fR]
+[\fB--scan-wx\fR \fIPID\fR]
 .SH DESCRIPTION
 PMV displays per-process security mitigation status on OpenBSD.
 It reads kernel process information via the kvm(3) interface
-(kernel memory) and shows pledge(2), unveil(2), W^X, chroot,
-and ASLR status for each running process.
+and shows pledge(2), unveil(2), W^X, and chroot status for each
+running process.
 .SH OPTIONS
 .TP
-.B \--watch
-Continuous monitoring mode with live updates.
-.TP
-.B \--json
-Export process mitigation data in JSON format.
-.TP
-.B \--help
+.B \--help, \-h
 Display this help message and exit.
+.TP
+.B \--version
+Display version information and exit.
+.TP
+.B \--quiet, \-q
+Suppress table output; useful with \fB--format\fR for scripted exports.
+.TP
+.B \--pid \fIPID\fR
+Filter results to show only the given PID and its children.
+.TP
+.B \--format \fIjson\fR|\fIcsv\fR
+Export process data in structured format.
+Writes to stdout, or to output.json/output.csv when combined with \fB--quiet\fR.
+.TP
+.B \--diff
+Compare current process state against the last saved snapshot.
+.TP
+.B \--scan-wx \fIPID\fR
+Scan memory regions of the given PID for W^X violations.
 .SH FILES
 .TP
 .I .pmv_snapshot
-Persistent state file for snapshot tracking.
+Internal snapshot file for diff tracking (auto-generated).
+.TP
+.I output.json
+JSON export file (when used with \fB--quiet --format json\fR).
+.TP
+.I output.csv
+CSV export file (when used with \fB--quiet --format csv\fR).
 .SH EXIT STATUS
 .B 0
 on success, 1 on error.
