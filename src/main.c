@@ -9,14 +9,14 @@
 #include <errno.h>
 #include <ctype.h>
 
-#define RED    "\x1b[31m"
-#define GRN    "\x1b[32m"
-#define YEL    "\x1b[33m"
-#define BLU    "\x1b[34m"
-#define MAG    "\x1b[35m"
-#define CYN    "\x1b[36m"
-#define BOLD   "\x1b[1m"
-#define RESET  "\x1b[0m"
+#define RED    (isatty(STDOUT_FILENO) ? "\x1b[31m" : "")
+#define GRN    (isatty(STDOUT_FILENO) ? "\x1b[32m" : "")
+#define YEL    (isatty(STDOUT_FILENO) ? "\x1b[33m" : "")
+#define BLU    (isatty(STDOUT_FILENO) ? "\x1b[34m" : "")
+#define MAG    (isatty(STDOUT_FILENO) ? "\x1b[35m" : "")
+#define CYN    (isatty(STDOUT_FILENO) ? "\x1b[36m" : "")
+#define BOLD   (isatty(STDOUT_FILENO) ? "\x1b[1m" : "")
+#define RESET  (isatty(STDOUT_FILENO) ? "\x1b[0m" : "")
 
 #define PMV_VERSION "1.0.0"
 
@@ -85,9 +85,9 @@ static void export_json_manual(const ProcessInfo *processes, int count, const ch
     int needs_close = 0;
     if (filename != NULL) {
         int fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW | O_CLOEXEC, 0644);
-        if (fd == -1) return;
+        if (fd == -1) { warn("cannot open %s", filename); return; }
         f = fdopen(fd, "w");
-        if (!f) { close(fd); return; }
+        if (!f) { close(fd); warn("cannot fdopen %s", filename); return; }
         needs_close = 1;
     }
     fputs("[\n", f);
@@ -120,9 +120,9 @@ static void export_csv(const ProcessInfo *processes, int count, const char *file
     int needs_close = 0;
     if (filename != NULL) {
         int fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW | O_CLOEXEC, 0644);
-        if (fd == -1) return;
+        if (fd == -1) { warn("cannot open %s", filename); return; }
         f = fdopen(fd, "w");
-        if (!f) { close(fd); return; }
+        if (!f) { close(fd); warn("cannot fdopen %s", filename); return; }
         needs_close = 1;
     }
     fprintf(f, "pid,ppid,name,ppname,pledge,unveil,wxneeded,chrooted,context,score\n");

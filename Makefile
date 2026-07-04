@@ -15,7 +15,7 @@ $(TARGET): $(SRC)
 	@strip $(TARGET)
 
 install: all install-man
-	install -m 755 -o root -g wheel $(TARGET) $(BINDIR)/pmv
+	@install -m 755 -o root -g wheel $(TARGET) $(BINDIR)/pmv
 	@echo "  📄 Installed man page to $(MANDIR)"
 
 install-man:
@@ -23,8 +23,8 @@ install-man:
 	@install -m 644 man/pmv.1 $(MANDIR)/pmv.1
 
 uninstall:
-	rm -f $(BINDIR)/pmv
-	rm -f $(MANDIR)/pmv.1
+	@rm -f $(BINDIR)/pmv
+	@rm -f $(MANDIR)/pmv.1
 	@-rmdir $(MANDIR) 2>/dev/null; true
 	@echo "  🗑 Removed pmv"
 

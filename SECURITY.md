@@ -20,4 +20,4 @@ PMV self-hardens using OpenBSD's pledge(2) and unveil(2) system calls at runtime
 
 ## Known Limitations
 
-- **TOCTOU in snapshot file**: The save/load snapshot operations use mkstemp()+rename() for atomicity, but the snapshot inherently reflects a point-in-time view.
+- **TOCTOU in snapshot file**: The save operation uses mkstemp()+rename() for atomicity, but the load operation reads the file directly. The snapshot inherently reflects a point-in-time view.

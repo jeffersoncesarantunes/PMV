@@ -94,15 +94,13 @@ Step 5 - Scoring (engine.c:80-89)
   process is compromised -- plenty of OpenBSD base system daemons
   don't use pledge(2) or unveil(2).
 
-Step 6 - Self-hardening (main.c:227-228)
+Step 6 - Self-hardening (main.c:315-316)
 
   After collecting process data but before producing output, PMV
   locks itself down:
 
+    unveil(".", "rwc")            -- current dir for all file I/O
     unveil("/dev", "r")           -- libkvm reads /dev/kmem
-    unveil("output.json", "rwc")  -- JSON export file
-    unveil("output.csv", "rwc")   -- CSV export file
-    unveil(".pmv_snapshot", "rwc") -- diff snapshot file
     unveil(NULL, NULL)            -- block all further filesystem access
 
     pledge("stdio rpath wpath cpath ps vminfo unveil", NULL)
