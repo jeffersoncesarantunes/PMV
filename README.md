@@ -141,6 +141,9 @@ git clone https://github.com/jeffersoncesarantunes/PMV.git
 cd PMV
 
 # Build
+make
+
+# (Optional) Clean rebuild from scratch
 make clean && make
 
 # Run (full system scan)
