@@ -8,7 +8,7 @@ BINDIR  = $(PREFIX)/bin
 MANDIR  = $(PREFIX)/share/man/man1
 
 all: $(TARGET)
-	@echo "OK Build successful!"
+	@echo "✅ Build successful!"
 
 $(TARGET): $(SRC)
 	@$(CC) $(CFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
@@ -16,7 +16,7 @@ $(TARGET): $(SRC)
 
 install: all install-man
 	install -m 755 -o root -g wheel $(TARGET) $(BINDIR)/pmv
-	@echo "  Installed man page to $(MANDIR)"
+	@echo "  📄 Installed man page to $(MANDIR)"
 
 install-man:
 	@mkdir -p $(MANDIR)
@@ -26,10 +26,10 @@ uninstall:
 	rm -f $(BINDIR)/pmv
 	rm -f $(MANDIR)/pmv.1
 	@-rmdir $(MANDIR) 2>/dev/null; true
-	@echo "  Removed pmv"
+	@echo "  🗑 Removed pmv"
 
 clean:
-	@echo "Clean."
+	@echo "🧹 Clean."
 	@rm -f $(TARGET)
 
 .PHONY: all clean install install-man uninstall
