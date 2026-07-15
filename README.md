@@ -133,37 +133,38 @@ doas sysctl kern.allowkmem=1
 
 ---
 
-## Build and Run
+## Quick Start
 
 ```bash
-# Clone the repository
 git clone https://github.com/jeffersoncesarantunes/PMV.git
-cd PMV
-
-# Build
-make
-
-# (Optional) Clean rebuild from scratch
-make clean && make
-
-# Run (full system scan)
+cd PMV && make
 doas ./pmv
+```
 
-# Show usage reference
-doas ./pmv --help
+## Build
 
-# Filter by PID (show <PID> and its children)
-doas ./pmv --pid <PID>
+```bash
+make                # Build the project
+make clean && make  # Clean rebuild from scratch
+```
 
-# Structured output
-doas ./pmv --format json --quiet
-doas ./pmv --format csv --quiet
+## Usage
 
-# Diff mode — compare against previous snapshot
-doas ./pmv --diff
+### General
 
-# W^X memory scan with per-region detail and violation summary
-doas ./pmv --scan-wx <PID>
+```bash
+doas ./pmv               # Run (full system scan)
+doas ./pmv --help        # Show usage reference
+doas ./pmv --pid <PID>   # Filter by PID (show <PID> and its children)
+doas ./pmv --diff        # Diff mode — compare against previous snapshot
+doas ./pmv --scan-wx <PID>  # W^X memory scan with per-region detail
+```
+
+### Export
+
+```bash
+doas ./pmv --format json --quiet  # JSON export (machine-readable)
+doas ./pmv --format csv --quiet   # CSV export (spreadsheet-friendly)
 ```
 
 ### Generated Artifacts
