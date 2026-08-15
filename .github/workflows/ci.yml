@@ -1,0 +1,21 @@
+name: PMV CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Check for banned functions
+        run: '! grep -rn "\<gets(" src/ include/ || exit 1'
+      - name: Check for format string misuse
+        run: '! grep -rnE "\bprintf\([^,]*\"%[^%]*\"" src/ include/ || true'
+      - name: Check headers are included via include/
+        run: 'grep -q "pmv.h" include/pmv.h && echo "header OK"'
+      - name: Verify Makefile targets exist
+        run: 'test -f Makefile && grep -q "^install:" Makefile && echo "Makefile OK"'
