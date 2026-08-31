@@ -30,6 +30,12 @@ uninstall:
 
 clean:
 	@echo "🧹 Clean."
-	@rm -f $(TARGET)
+	@rm -f $(TARGET) tests/test_pmv
 
-.PHONY: all clean install install-man uninstall
+test:
+	@echo "🧪 Running test suite..."
+	@$(CC) -Wall -Wextra $(CFLAGS) tests/test_pmv.c -o tests/test_pmv
+	@./tests/test_pmv
+	@rm -f tests/test_pmv
+
+.PHONY: all clean install install-man uninstall test

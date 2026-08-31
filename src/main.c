@@ -169,6 +169,7 @@ static int save_snapshot(const ProcessInfo *plist, int count) {
 
 static int parse_int(const char *s, int *out) {
     char *end;
+    if (s == NULL || *s == '\0') return -1;
     long v = strtol(s, &end, 10);
     if (*end != '\0' || v < 0 || v > 999999) return -1;
     *out = (int)v;
