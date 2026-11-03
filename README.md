@@ -68,6 +68,28 @@ PID      PPID   PROCESS                PARENT                 PLEDGE  UNVEIL  W^
 
 *Output reflects kernel-reported mitigation state. `PRESENT` confirms the syscall was called — it does not indicate policy depth or scope.*
 
+### Example: process using pledge and unveil
+
+The following is an illustrative example of a process that has called both `pledge(2)` and `unveil(2)`:
+
+```text
+$ doas ./pmv --pid 12345
+PID      PPID   PROCESS                PARENT                 PLEDGE  UNVEIL  W^X     SCORE
+-----------------------------------------------------------------------------------------------------
+12345    1      demo                   init                   PRESENT PRESENT ok      5
+```
+
+| Field | Value | Meaning |
+| :---- | :---- | :------ |
+| `PLEDGE` | `PRESENT` | The process called `pledge(2)`. The specific promises are not exposed by the kernel. |
+| `UNVEIL` | `PRESENT` | The process called `unveil(2)`. The specific paths are not exposed by the kernel. |
+| `W^X` | `ok` | The kernel did not report the `WXNEEDED` flag for this process. |
+| `SCORE` | `5` | `pledge` (+3) + `unveil` (+2), with no W^X penalty. |
+
+`PRESENT` means the mitigation syscall was called, not that the policy is strong or complete. For per-region W^X analysis, use `--scan-wx <PID>`.
+
+PIDs, process names, and scores vary by system and by the privileges used to run PMV.
+
 
 ---
 
