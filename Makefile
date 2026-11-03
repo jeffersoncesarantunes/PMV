@@ -2,7 +2,7 @@ CC = cc
 CFLAGS = -Wall -Wextra -O2 -fstack-protector-strong -D_FORTIFY_SOURCE=2 -fPIE -I./include -I/usr/local/include
 LDFLAGS = -lkvm -pie -Wl,-z,relro,-z,now -Wl,-z,noexecstack
 TARGET = pmv
-SRC = src/main.c src/engine.c
+SRC = src/main.c src/engine.c src/score.c src/util.c
 PREFIX ?= /usr/local
 BINDIR  = $(PREFIX)/bin
 MANDIR  = $(PREFIX)/share/man/man1
@@ -10,7 +10,7 @@ MANDIR  = $(PREFIX)/share/man/man1
 all: $(TARGET)
 	@echo "✅ Build successful!"
 
-$(TARGET): $(SRC)
+$(TARGET): $(SRC) include/pmv.h
 	@$(CC) $(CFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
 	@strip $(TARGET)
 
@@ -34,7 +34,7 @@ clean:
 
 test:
 	@echo "🧪 Running test suite..."
-	@$(CC) -Wall -Wextra $(CFLAGS) tests/test_pmv.c -o tests/test_pmv
+	@$(CC) -Wall -Wextra $(CFLAGS) tests/test_pmv.c src/util.c src/score.c -o tests/test_pmv
 	@./tests/test_pmv
 	@rm -f tests/test_pmv
 

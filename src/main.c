@@ -43,43 +43,6 @@ void print_header(void) {
     printf("==========================================================================================\n" RESET);
 }
 
-static void json_escape(FILE *f, const char *s) {
-    fputc('"', f);
-    while (*s) {
-        switch (*s) {
-            case '"':  fprintf(f, "\\\""); break;
-            case '\\': fprintf(f, "\\\\"); break;
-            case '\n': fprintf(f, "\\n");  break;
-            case '\r': fprintf(f, "\\r");  break;
-            case '\t': fprintf(f, "\\t");  break;
-            default:   fputc(*s, f);       break;
-        }
-        s++;
-    }
-    fputc('"', f);
-}
-
-static void csv_field(FILE *f, const char *s) {
-    int needs_quote = 0;
-    for (const char *p = s; *p; p++) {
-        if (*p == ',' || *p == '"' || *p == '\n' || *p == '\r') {
-            needs_quote = 1;
-            break;
-        }
-    }
-    if (needs_quote) {
-        fputc('"', f);
-        while (*s) {
-            if (*s == '"') fprintf(f, "\"\"");
-            else fputc(*s, f);
-            s++;
-        }
-        fputc('"', f);
-    } else {
-        fprintf(f, "%s", s);
-    }
-}
-
 static void export_json_manual(const ProcessInfo *processes, int count, const char *filename) {
     FILE *f = stdout;
     int needs_close = 0;
@@ -96,10 +59,10 @@ static void export_json_manual(const ProcessInfo *processes, int count, const ch
         fprintf(f, "    \"pid\": %d,\n", processes[i].pid);
         fprintf(f, "    \"ppid\": %d,\n", processes[i].ppid);
         fprintf(f, "    \"name\": ");
-        json_escape(f, processes[i].name);
+        pmv_json_escape(f, processes[i].name);
         fprintf(f, ",\n");
         fprintf(f, "    \"ppname\": ");
-        json_escape(f, processes[i].ppname);
+        pmv_json_escape(f, processes[i].ppname);
         fprintf(f, ",\n");
         fprintf(f, "    \"pledge\": %s,\n", processes[i].has_pledge ? "true" : "false");
         fprintf(f, "    \"unveil\": %s,\n", processes[i].has_unveil ? "true" : "false");
@@ -128,9 +91,9 @@ static void export_csv(const ProcessInfo *processes, int count, const char *file
     fprintf(f, "pid,ppid,name,ppname,pledge,unveil,wxneeded,chrooted,context,score\n");
     for (int i = 0; i < count; i++) {
         fprintf(f, "%d,%d,", processes[i].pid, processes[i].ppid);
-        csv_field(f, processes[i].name);
+        pmv_csv_field(f, processes[i].name);
         fprintf(f, ",");
-        csv_field(f, processes[i].ppname);
+        pmv_csv_field(f, processes[i].ppname);
         fprintf(f, ",%d,%d,%d,%d,%s,%d\n",
             processes[i].has_pledge, processes[i].has_unveil,
             processes[i].wxneeded, processes[i].chrooted,
@@ -157,22 +120,19 @@ static int save_snapshot(const ProcessInfo *plist, int count) {
     FILE *f = fdopen(fd, "w");
     if (!f) { close(fd); unlink(tmp_path); return -1; }
     for (int i = 0; i < count; i++) {
+        char encoded[256];
+        if (pmv_snapshot_encode(plist[i].name, encoded, sizeof(encoded)) != 0) {
+            fclose(f);
+            unlink(tmp_path);
+            return -1;
+        }
         fprintf(f, "%d|%s|%d|%d|%d\n",
-            plist[i].pid, plist[i].name,
+            plist[i].pid, encoded,
             plist[i].has_pledge, plist[i].has_unveil,
             plist[i].wxneeded);
     }
     if (fclose(f) != 0) { unlink(tmp_path); return -1; }
     if (rename(tmp_path, path) == -1) { unlink(tmp_path); return -1; }
-    return 0;
-}
-
-static int parse_int(const char *s, int *out) {
-    char *end;
-    if (s == NULL || *s == '\0') return -1;
-    long v = strtol(s, &end, 10);
-    if (*end != '\0' || v < 0 || v > 999999) return -1;
-    *out = (int)v;
     return 0;
 }
 
@@ -196,22 +156,22 @@ static ProcessInfo *load_snapshot(int *count) {
         }
         char *tok = strtok(line, "|\n");
         if (!tok) continue;
-        if (parse_int(tok, &arr[n].pid) != 0) continue;
+        if (pmv_parse_int(tok, &arr[n].pid) != 0) continue;
         tok = strtok(NULL, "|\n");
         if (!tok) continue;
-        strlcpy(arr[n].name, tok, sizeof(arr[n].name));
+        if (pmv_snapshot_decode(tok, arr[n].name, sizeof(arr[n].name)) != 0) continue;
         tok = strtok(NULL, "|\n");
         if (!tok) continue;
         int val;
-        if (parse_int(tok, &val) != 0) continue;
+        if (pmv_parse_int(tok, &val) != 0) continue;
         arr[n].has_pledge = val;
         tok = strtok(NULL, "|\n");
         if (!tok) continue;
-        if (parse_int(tok, &val) != 0) continue;
+        if (pmv_parse_int(tok, &val) != 0) continue;
         arr[n].has_unveil = val;
         tok = strtok(NULL, "|\n");
         if (!tok) continue;
-        if (parse_int(tok, &val) != 0) continue;
+        if (pmv_parse_int(tok, &val) != 0) continue;
         arr[n].wxneeded = val;
         n++;
     }
@@ -276,11 +236,11 @@ int main(int argc, char *argv[]) {
         else if (strcmp(argv[i], "--diff") == 0) { diff_mode = 1; }
         else if (strcmp(argv[i], "--scan-wx") == 0) {
             if (i + 1 >= argc || argv[i+1][0] == '-') errx(1, "PID required");
-            if (parse_int(argv[++i], &target_wx_pid) != 0) errx(1, "Invalid PID");
+            if (pmv_parse_int(argv[++i], &target_wx_pid) != 0) errx(1, "Invalid PID");
         } else if (strcmp(argv[i], "--pid") == 0) {
             if (i + 1 >= argc || argv[i+1][0] == '-') errx(1, "PID required");
             int parsed;
-            if (parse_int(argv[++i], &parsed) != 0) errx(1, "Invalid PID");
+            if (pmv_parse_int(argv[++i], &parsed) != 0) errx(1, "Invalid PID");
             target_pid = (pid_t)parsed;
         } else if (strcmp(argv[i], "--format") == 0) {
             if (i + 1 >= argc || argv[i+1][0] == '-') errx(1, "format required");
@@ -305,10 +265,16 @@ int main(int argc, char *argv[]) {
     if (target_pid > 0) {
         display_count = 0;
         for (int i = 0; i < count; i++) if (processes[i].pid == target_pid || processes[i].ppid == target_pid) display_count++;
-        display_list = calloc(display_count, sizeof(ProcessInfo));
-        if (!display_list) err(1, "calloc");
-        int idx = 0;
-        for (int i = 0; i < count; i++) if (processes[i].pid == target_pid || processes[i].ppid == target_pid) display_list[idx++] = processes[i];
+        if (display_count > 0) {
+            display_list = calloc((size_t)display_count, sizeof(ProcessInfo));
+            if (!display_list) err(1, "calloc");
+            int idx = 0;
+            for (int i = 0; i < count; i++)
+                if (processes[i].pid == target_pid || processes[i].ppid == target_pid)
+                    display_list[idx++] = processes[i];
+        } else {
+            display_list = NULL;
+        }
     }
     int oldp_count = 0;
     ProcessInfo *oldp = NULL;
