@@ -19,6 +19,11 @@ jobs:
         run: 'grep -q "#include \"pmv.h\"" src/*.c && echo "header OK"'
       - name: Verify Makefile targets exist
         run: 'test -f Makefile && grep -q "^install:" Makefile && echo "Makefile OK"'
+      - name: Check C formatting
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq clang-format
+          clang-format --version
+          find src include -name "*.c" -o -name "*.h" | xargs clang-format --dry-run --Werror --output-replacements-xml | grep -q "<replacement " && { echo "Formatting issues found. Run: clang-format -i src/*.c include/*.h"; exit 1; } || echo "Formatting OK"
 
   unit-tests:
     runs-on: ubuntu-latest

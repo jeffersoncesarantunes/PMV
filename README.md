@@ -4,7 +4,8 @@ Lightweight OpenBSD process mitigation visibility tool — looks at pledge, unve
 
 
 [![CI](https://img.shields.io/github/actions/workflow/status/jeffersoncesarantunes/PMV/ci.yml?style=flat-square&logo=githubactions&label=CI)](https://github.com/jeffersoncesarantunes/PMV/actions/workflows/ci.yml)
-[![CodeQL](https://img.shields.io/github/actions/workflow/status/jeffersoncesarantunes/PMV/codeql.yml?style=flat-square&logo=githubactions&label=CodeQL)](https://github.com/jeffersoncesarantunes/PMV/actions/workflows/codeql.yml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/jeffersoncesarantunes/PMV/codeql.yml?style=flat-square&logo=codeql&label=CodeQL)](https://github.com/jeffersoncesarantunes/PMV/actions/workflows/codeql.yml)
+[![Tests](https://img.shields.io/badge/tests-unit%20&%20fuzz-passing-brightgreen?style=flat-square)](https://github.com/jeffersoncesarantunes/PMV/actions/workflows/ci.yml)
 [![License-MIT](https://img.shields.io/badge/License-MIT-EE0000?style=flat-square&logo=license&logoColor=white)](LICENSE)
 [![Tested-On](https://img.shields.io/badge/Tested%20on-OpenBSD%208.0-1793D1?style=flat-square)](https://www.openbsd.org/80.html)
 
