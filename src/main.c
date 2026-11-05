@@ -22,7 +22,7 @@ static const char *ansi(const char *code) {
 #define BOLD   ansi("\x1b[1m")
 #define RESET  ansi("\x1b[0m")
 
-#define PMV_VERSION "1.0.0"
+#define PMV_VERSION "development"
 
 #define SNAPSHOT_FILE ".pmv_snapshot"
 
@@ -234,7 +234,7 @@ int main(int argc, char *argv[]) {
     pid_t target_pid = 0;
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) { usage(); return 0; }
-        else if (strcmp(argv[i], "--version") == 0) { puts("pmv " PMV_VERSION); return 0; }
+        else if (strcmp(argv[i], "--version") == 0) { puts("pmv (development build)"); return 0; }
         else if (strcmp(argv[i], "--quiet") == 0 || strcmp(argv[i], "-q") == 0) { quiet_mode = 1; }
         else if (strcmp(argv[i], "--diff") == 0) { diff_mode = 1; }
         else if (strcmp(argv[i], "--scan-wx") == 0) {

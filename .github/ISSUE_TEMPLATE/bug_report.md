@@ -24,7 +24,7 @@ Descreva o que você esperava que acontecesse.
 ## Ambiente
 
 * OpenBSD versão: [ex. 8.0]
-* PMV versão/commit: [ex. v1.0.0 / abc123]
+* PMV versão/commit: [ex. main / abc123]
 * Arquitetura: [ex. amd64]
 
 ## Logs / saída
