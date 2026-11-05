@@ -19,6 +19,7 @@ output.csv
 tests/test_pmv
 tests/fuzz/fuzz_snapshot
 evidence/
+.commit-sha
 
 .env
 .ssh/

@@ -8,6 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - name: Record commit
+        run: git rev-parse HEAD > .commit-sha
       - name: Collect evidence on OpenBSD 8.0
         uses: vmactions/openbsd-vm@v1
         with:
@@ -22,7 +24,7 @@ jobs:
             gmake verify > evidence/verify.txt 2>&1
             ./pmv --version > evidence/version.txt
             uname -a > evidence/uname.txt
-            git rev-parse HEAD > evidence/commit.txt
+            cp .commit-sha evidence/commit.txt
             sysctl kern.allowkmem=1 > /dev/null 2>&1 || true
             ./pmv --format json > evidence/pmv.json
             python3 -m json.tool evidence/pmv.json > /dev/null
