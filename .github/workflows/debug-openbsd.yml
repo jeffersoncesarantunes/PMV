@@ -1,0 +1,71 @@
+name: Debug OpenBSD kinfo
+
+on:
+  workflow_dispatch:
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Probe unveil fields on OpenBSD 8.0
+        uses: vmactions/openbsd-vm@v1
+        with:
+          release: "8.0"
+          usesh: true
+          prepare: |
+            pkg_add gmake python3
+          run: |
+            cat > /tmp/pledged.c <<'EOF'
+            #include <unistd.h>
+            int main(void) {
+                if (unveil("/", "r") == -1) return 1;
+                if (unveil(NULL, NULL) == -1) return 1;
+                if (pledge("stdio", NULL) == -1) return 2;
+                for (;;) sleep(60);
+            }
+            EOF
+            cat > /tmp/probe.c <<'EOF'
+            #include <stdio.h>
+            #include <stdlib.h>
+            #include <sys/types.h>
+            #include <sys/sysctl.h>
+            #include <sys/proc.h>
+            #include <kvm.h>
+            int main(int argc, char **argv) {
+                int pid = atoi(argv[1]);
+                int mib[5] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, pid, sizeof(struct kinfo_proc) };
+                struct kinfo_proc kp;
+                size_t len = sizeof(kp);
+                if (sysctl(mib, 5, &kp, &len, NULL, 0) == -1) { perror("sysctl"); }
+                else printf("sysctl: pid=%d comm=%.*s psflags=0x%08x eflag=0x%08x pledge=0x%llx\n",
+                    kp.p_pid, (int)sizeof(kp.p_comm), kp.p_comm, kp.p_psflags,
+                    (unsigned)kp.p_eflag, (unsigned long long)kp.p_pledge);
+                char err[256];
+                kvm_t *kd = kvm_openfiles(NULL, NULL, NULL, KVM_NO_FILES, err);
+                if (kd) {
+                    int n = 0;
+                    struct kinfo_proc *list = kvm_getprocs(kd, KERN_PROC_PID, pid,
+                        sizeof(struct kinfo_proc), &n);
+                    if (list && n > 0) printf("kvm:    pid=%d comm=%.*s psflags=0x%08x eflag=0x%08x pledge=0x%llx\n",
+                        list[0].p_pid, (int)sizeof(list[0].p_comm), list[0].p_comm,
+                        list[0].p_psflags, (unsigned)list[0].p_eflag,
+                        (unsigned long long)list[0].p_pledge);
+                    else printf("kvm: no rows (n=%d)\n", n);
+                    kvm_close(kd);
+                }
+                printf("consts: EPROC_UNVEIL=0x%x EPROC_LKUNVEIL=0x%x PS_PLEDGE=0x%x PS_CHROOT=0x%x\n",
+                    EPROC_UNVEIL, EPROC_LKUNVEIL, PS_PLEDGE, PS_CHROOT);
+                return 0;
+            }
+            EOF
+            cc -O2 -o /tmp/pledged /tmp/pledged.c
+            cc -O2 -o /tmp/probe /tmp/probe.c -lkvm
+            gmake all
+            /tmp/pledged & pid=$!
+            sleep 1
+            echo "helper pid=$pid"
+            ps -o pid,state,pledge,command -p "$pid"
+            /tmp/probe "$pid"
+            ./pmv --pid "$pid" --format json
+            kill "$pid" 2>/dev/null || true
