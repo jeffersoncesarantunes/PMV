@@ -8,6 +8,20 @@ W^X state per process via `libkvm(3)`.
 [![License-MIT](https://img.shields.io/badge/License-MIT-EE0000?style=flat-square&logo=license&logoColor=white)](LICENSE)
 [![Tested-On](https://img.shields.io/badge/Tested%20on-OpenBSD%208.0-1793D1?style=flat-square)](https://www.openbsd.org/80.html)
 
+## Table of Contents
+
+- [What PMV is](#what-pmv-is)
+- [Get started](#get-started)
+- [Example output](#example-output)
+- [Flags](#flags)
+- [Security scoring](#security-scoring)
+- [OpenBSD limitations](#openbsd-limitations)
+- [When not to use PMV](#when-not-to-use-pmv)
+- [Project in Action](#project-in-action)
+- [Security](#security)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## What PMV is
 
 PMV reads kernel-exposed process metadata through `libkvm(3)` and `struct
