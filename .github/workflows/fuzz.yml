@@ -1,0 +1,21 @@
+name: Fuzzing
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build fuzz target
+        run: make fuzz FUZZ_CC=clang
+      - name: Run fuzzer for 60 seconds
+        run: |
+          mkdir -p /tmp/corpus
+          cp tests/fuzz/corpus/* /tmp/corpus/
+          ./tests/fuzz/fuzz_snapshot -max_total_time=60 -print_final_stats=1 /tmp/corpus

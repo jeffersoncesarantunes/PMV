@@ -1,0 +1,38 @@
+name: Evidence
+
+on:
+  workflow_dispatch:
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Collect evidence on OpenBSD 8.0
+        uses: vmactions/openbsd-vm@v1
+        with:
+          release: "8.0"
+          usesh: true
+          prepare: |
+            pkg_add gmake python3
+          run: |
+            set -eu
+            mkdir -p evidence
+            gmake all
+            gmake verify > evidence/verify.txt 2>&1
+            ./pmv --version > evidence/version.txt
+            uname -a > evidence/uname.txt
+            git rev-parse HEAD > evidence/commit.txt
+            sysctl kern.allowkmem=1 > /dev/null 2>&1 || true
+            ./pmv --format json > evidence/pmv.json
+            python3 -m json.tool evidence/pmv.json > /dev/null
+            ./pmv --scan-wx $$ > evidence/scan-wx-self.txt 2>&1 || true
+            gmake bench > evidence/bench.txt
+            sha256 pmv > evidence/sha256.txt
+            echo "--- bench ---"
+            cat evidence/bench.txt
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: openbsd-8.0-evidence
+          path: evidence/
