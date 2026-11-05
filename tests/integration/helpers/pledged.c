@@ -6,7 +6,7 @@ int main(void)
         return 1;
     if (unveil(NULL, NULL) == -1)
         return 1;
-    if (pledge("stdio", NULL) == -1)
+    if (pledge("stdio unveil", NULL) == -1)
         return 1;
 
     for (;;)
