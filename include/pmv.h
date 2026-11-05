@@ -12,7 +12,6 @@ typedef struct {
     char ppname[64];
     int has_pledge;
     int has_unveil;
-    int wxneeded;
     int chrooted;
     int score;
 } ProcessInfo;

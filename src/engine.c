@@ -19,18 +19,6 @@
 #define _POSIX2_LINE_MAX 2048
 #endif
 
-#ifndef PS_WXNEEDED
-#define PS_WXNEEDED 0x00040000
-#endif
-
-#ifndef PS_UNVEIL
-#define PS_UNVEIL 0x01000000
-#endif
-
-#ifndef P_CHROOT
-#define P_CHROOT 0x00004000
-#endif
-
 ProcessInfo* get_all_processes(int *count) {
     kvm_t *kd;
     char errbuf[_POSIX2_LINE_MAX];
@@ -57,9 +45,8 @@ ProcessInfo* get_all_processes(int *count) {
         list[i].ppid = kp[i].p_ppid;
         strlcpy(list[i].name, kp[i].p_comm, sizeof(list[i].name));
         list[i].has_pledge = (kp[i].p_psflags & PS_PLEDGE) ? 1 : 0;
-        list[i].has_unveil = (kp[i].p_psflags & PS_UNVEIL) ? 1 : 0;
-        list[i].wxneeded = (kp[i].p_psflags & PS_WXNEEDED) ? 1 : 0;
-        list[i].chrooted = (kp[i].p_flag & P_CHROOT) ? 1 : 0;
+        list[i].has_unveil = (kp[i].p_eflag & EPROC_UNVEIL) ? 1 : 0;
+        list[i].chrooted = (kp[i].p_psflags & PS_CHROOT) ? 1 : 0;
     }
 
     for (int i = 0; i < nprocs; i++) {

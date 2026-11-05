@@ -70,7 +70,6 @@ static void export_json_manual(const ProcessInfo *processes, int count, const ch
         fprintf(f, ",\n");
         fprintf(f, "    \"pledge\": %s,\n", processes[i].has_pledge ? "true" : "false");
         fprintf(f, "    \"unveil\": %s,\n", processes[i].has_unveil ? "true" : "false");
-        fprintf(f, "    \"wxneeded\": %s,\n", processes[i].wxneeded ? "true" : "false");
         fprintf(f, "    \"chrooted\": %s,\n", processes[i].chrooted ? "true" : "false");
         fprintf(f, "    \"context\": \"%s\",\n", (processes[i].pid < 100) ? "KERNEL" : "NATIVE");
         fprintf(f, "    \"score\": %d\n", processes[i].score);
@@ -92,15 +91,15 @@ static void export_csv(const ProcessInfo *processes, int count, const char *file
         if (!f) { close(fd); warn("cannot fdopen %s", filename); return; }
         needs_close = 1;
     }
-    fprintf(f, "pid,ppid,name,ppname,pledge,unveil,wxneeded,chrooted,context,score\n");
+    fprintf(f, "pid,ppid,name,ppname,pledge,unveil,chrooted,context,score\n");
     for (int i = 0; i < count; i++) {
         fprintf(f, "%d,%d,", processes[i].pid, processes[i].ppid);
         pmv_csv_field(f, processes[i].name);
         fprintf(f, ",");
         pmv_csv_field(f, processes[i].ppname);
-        fprintf(f, ",%d,%d,%d,%d,%s,%d\n",
+        fprintf(f, ",%d,%d,%d,%s,%d\n",
             processes[i].has_pledge, processes[i].has_unveil,
-            processes[i].wxneeded, processes[i].chrooted,
+            processes[i].chrooted,
             (processes[i].pid < 100) ? "KERNEL" : "NATIVE",
             processes[i].score
         );
@@ -133,7 +132,7 @@ static int save_snapshot(const ProcessInfo *plist, int count) {
         fprintf(f, "%d|%s|%d|%d|%d\n",
             plist[i].pid, encoded,
             plist[i].has_pledge, plist[i].has_unveil,
-            plist[i].wxneeded);
+            plist[i].chrooted);
     }
     if (fclose(f) != 0) { unlink(tmp_path); return -1; }
     if (rename(tmp_path, path) == -1) { unlink(tmp_path); return -1; }
@@ -176,7 +175,7 @@ static ProcessInfo *load_snapshot(int *count) {
         tok = strtok(NULL, "|\n");
         if (!tok) continue;
         if (pmv_parse_int(tok, &val) != 0) continue;
-        arr[n].wxneeded = val;
+        arr[n].chrooted = val;
         n++;
     }
     fclose(f);
@@ -187,7 +186,7 @@ static ProcessInfo *load_snapshot(int *count) {
 static void print_diff(const ProcessInfo *oldp, int oldc, const ProcessInfo *newp, int newc) {
     int changes = 0;
     printf("\n%s[+] CHANGES FROM LAST SNAPSHOT\n%s", BOLD, RESET);
-    printf("%-6s  %-7s %-7s %-7s  %s\n", "PID", "PLEDGE", "UNVEIL", "W^X", "PROCESS / NOTE");
+    printf("%-6s  %-7s %-7s %-7s  %s\n", "PID", "PLEDGE", "UNVEIL", "CHROOT", "PROCESS / NOTE");
     for (int i = 0; i < newc; i++) {
         int found = 0;
         for (int j = 0; j < oldc; j++) {
@@ -195,12 +194,12 @@ static void print_diff(const ProcessInfo *oldp, int oldc, const ProcessInfo *new
                 found = 1;
                 if (newp[i].has_pledge != oldp[j].has_pledge ||
                     newp[i].has_unveil != oldp[j].has_unveil ||
-                    newp[i].wxneeded  != oldp[j].wxneeded) {
+                    newp[i].chrooted  != oldp[j].chrooted) {
                     changes++;
                     printf("~ %-6d  ", newp[i].pid);
                     printf("%s=>%s ", oldp[j].has_pledge ? "PRESENT" : "NONE    ", newp[i].has_pledge ? "PRESENT" : "NONE");
                     printf("%s=>%s ", oldp[j].has_unveil ? "PRESENT" : "NONE    ", newp[i].has_unveil ? "PRESENT" : "NONE");
-                    printf("%s=>%s  ", oldp[j].wxneeded ? "W^X" : "ok ", newp[i].wxneeded ? "W^X" : "ok ");
+                    printf("%s=>%s  ", oldp[j].chrooted ? "CHROOT" : "no    ", newp[i].chrooted ? "CHROOT" : "no    ");
                     printf("%s\n", newp[i].name);
                 }
                 break;
@@ -208,7 +207,7 @@ static void print_diff(const ProcessInfo *oldp, int oldc, const ProcessInfo *new
         }
         if (!found) {
             changes++;
-            printf("+ %-6d  %-7s %-7s %-7s  %s (new)\n", newp[i].pid, newp[i].has_pledge ? "PRESENT" : "NONE", newp[i].has_unveil ? "PRESENT" : "NONE", newp[i].wxneeded ? "W^X" : "ok", newp[i].name);
+            printf("+ %-6d  %-7s %-7s %-7s  %s (new)\n", newp[i].pid, newp[i].has_pledge ? "PRESENT" : "NONE", newp[i].has_unveil ? "PRESENT" : "NONE", newp[i].chrooted ? "CHROOT" : "no", newp[i].name);
         }
     }
     for (int i = 0; i < oldc; i++) {
@@ -218,7 +217,7 @@ static void print_diff(const ProcessInfo *oldp, int oldc, const ProcessInfo *new
         }
         if (!found) {
             changes++;
-            printf("- %-6d  %-7s %-7s %-7s  %s (exited)\n", oldp[i].pid, oldp[i].has_pledge ? "PRESENT" : "NONE", oldp[i].has_unveil ? "PRESENT" : "NONE", oldp[i].wxneeded ? "W^X" : "ok", oldp[i].name);
+            printf("- %-6d  %-7s %-7s %-7s  %s (exited)\n", oldp[i].pid, oldp[i].has_pledge ? "PRESENT" : "NONE", oldp[i].has_unveil ? "PRESENT" : "NONE", oldp[i].chrooted ? "CHROOT" : "no", oldp[i].name);
         }
     }
     if (changes == 0) printf("  (no changes)\n");
@@ -287,14 +286,15 @@ int main(int argc, char *argv[]) {
     if (pledge("stdio rpath wpath cpath ps vminfo unveil", NULL) == -1) err(1, "pledge");
     if (out_format == NONE && !quiet_mode) {
         if (target_pid > 0) printf("\n%s[+] Filtered PID %d\n%s", BOLD, target_pid, RESET);
-        printf("\n%s%-8s %-6s %-22s %-22s %-7s %-7s %-7s %-6s\n%s", BOLD, "PID", "PPID", "PROCESS", "PARENT", "PLEDGE", "UNVEIL", "W^X", "SCORE", RESET);
+        printf("\n%s%-8s %-6s %-22s %-22s %-7s %-7s %-7s %-6s\n%s", BOLD, "PID", "PPID", "PROCESS", "PARENT", "PLEDGE", "UNVEIL", "CHROOT", "SCORE", RESET);
         print_separator();
     }
-    int pledged_count = 0, unveiled_count = 0, chroot_count = 0, wx_count = 0, score_sum = 0, score_max = -999, score_min = 999;
+    int pledged_count = 0, unveiled_count = 0, chroot_count = 0;
     for (int i = 0; i < display_count; i++) {
         ProcessInfo *p = &display_list[i];
-        if (p->has_pledge) pledged_count++; if (p->has_unveil) unveiled_count++; if (p->chrooted) chroot_count++; if (p->wxneeded) wx_count++;
-        score_sum += p->score; if (p->score > score_max) score_max = p->score; if (p->score < score_min) score_min = p->score;
+        if (p->has_pledge) pledged_count++;
+        if (p->has_unveil) unveiled_count++;
+        if (p->chrooted) chroot_count++;
         if (out_format == NONE && !quiet_mode) {
             const char *ctx_color = (p->pid < 100) ? MAG : BLU;
             printf("%s%-8d%s %-6d %-22.22s %-22.22s %s%-7s%s %s%-7s%s %s%-7s%s %s%-6d%s\n",
@@ -302,7 +302,7 @@ int main(int argc, char *argv[]) {
                 p->ppid, p->name, p->ppname,
                 p->has_pledge ? GRN : RED, p->has_pledge ? "PRESENT" : "NONE", RESET,
                 p->has_unveil ? GRN : YEL, p->has_unveil ? "PRESENT" : "NONE", RESET,
-                p->wxneeded ? RED : GRN, p->wxneeded ? "W^X" : "ok", RESET,
+                p->chrooted ? GRN : YEL, p->chrooted ? "CHROOT" : "no", RESET,
                 score_color(p->score), p->score, RESET);
             if ((i + 1) % 20 == 0 && (i + 1) < display_count && isatty(STDIN_FILENO)) { getchar(); }
         }
@@ -310,7 +310,7 @@ int main(int argc, char *argv[]) {
     if (out_format == NONE && diff_mode && oldp) { print_diff(oldp, oldp_count, display_list, display_count); free(oldp); }
     if (out_format == NONE && !quiet_mode) {
         print_separator();
-        printf("\n%s[+] MITIGATION SUMMARY\n%s    [#] Total: %d\n    [#] Pledge: %d\n    [#] Unveil: %d\n    [#] W^X Violations: %d\n", BOLD, RESET, display_count, pledged_count, unveiled_count, wx_count);
+        printf("\n%s[+] MITIGATION SUMMARY\n%s    [#] Total: %d\n    [#] Pledge: %d\n    [#] Unveil: %d\n    [#] Chroot: %d\n", BOLD, RESET, display_count, pledged_count, unveiled_count, chroot_count);
     }
     if (out_format == JSON) export_json_manual(display_list, display_count, quiet_mode ? "output.json" : NULL);
     if (out_format == CSV) export_csv(display_list, display_count, quiet_mode ? "output.csv" : NULL);

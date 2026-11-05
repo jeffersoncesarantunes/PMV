@@ -95,7 +95,7 @@ with open(sys.argv[1], encoding="utf-8") as handle:
 
 required = {
     "pid", "ppid", "name", "ppname", "pledge", "unveil",
-    "wxneeded", "chrooted", "context", "score",
+    "chrooted", "context", "score",
 }
 assert isinstance(doc, list) and doc, "expected a non-empty JSON array"
 for row in doc:
@@ -105,7 +105,6 @@ for row in doc:
         (3 if row["pledge"] else 0)
         + (2 if row["unveil"] else 0)
         + (1 if row["chrooted"] else 0)
-        - (2 if row["wxneeded"] else 0)
     )
     assert row["score"] == expected, (row, expected)
 PY

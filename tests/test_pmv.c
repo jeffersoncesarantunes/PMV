@@ -111,15 +111,15 @@ static void test_score(void)
     CHECK(compute_security_score(&p) == 5, "score pledge+unveil = 5");
     p.chrooted = 1;
     CHECK(compute_security_score(&p) == 6, "score +chroot = 6");
-    p.wxneeded = 1;
-    CHECK(compute_security_score(&p) == 4, "score -wxneeded = 4");
 
     memset(&p, 0, sizeof(p));
     CHECK(compute_security_score(&p) == 0, "score none = 0");
-    p.wxneeded = 1;
-    CHECK(compute_security_score(&p) == -2, "score wxneeded only = -2");
+    p.has_unveil = 1;
+    CHECK(compute_security_score(&p) == 2, "score unveil only = 2");
+    p.chrooted = 1;
+    CHECK(compute_security_score(&p) == 3, "score unveil+chroot = 3");
     p.has_pledge = 1;
-    CHECK(compute_security_score(&p) == 1, "score pledge - wxneeded = 1");
+    CHECK(compute_security_score(&p) == 6, "score pledge+unveil+chroot = 6");
 }
 
 static void test_snapshot_codec(void)
