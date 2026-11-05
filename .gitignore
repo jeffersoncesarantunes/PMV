@@ -16,6 +16,10 @@ output.csv
 
 .sisyphus/
 
+tests/test_pmv
+tests/fuzz/fuzz_snapshot
+evidence/
+
 .env
 .ssh/
 .gnupg/
