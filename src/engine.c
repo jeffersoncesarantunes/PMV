@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include <unistd.h>
 #include <sys/param.h>
 #include <sys/sysctl.h>
@@ -13,6 +14,10 @@
 #include <errno.h>
 #include <err.h>
 #include "pmv.h"
+
+#ifndef _POSIX2_LINE_MAX
+#define _POSIX2_LINE_MAX 2048
+#endif
 
 #ifndef PS_WXNEEDED
 #define PS_WXNEEDED 0x00040000

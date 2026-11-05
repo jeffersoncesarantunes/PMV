@@ -9,14 +9,18 @@
 #include <errno.h>
 #include <ctype.h>
 
-#define RED    (isatty(STDOUT_FILENO) ? "\x1b[31m" : "")
-#define GRN    (isatty(STDOUT_FILENO) ? "\x1b[32m" : "")
-#define YEL    (isatty(STDOUT_FILENO) ? "\x1b[33m" : "")
-#define BLU    (isatty(STDOUT_FILENO) ? "\x1b[34m" : "")
-#define MAG    (isatty(STDOUT_FILENO) ? "\x1b[35m" : "")
-#define CYN    (isatty(STDOUT_FILENO) ? "\x1b[36m" : "")
-#define BOLD   (isatty(STDOUT_FILENO) ? "\x1b[1m" : "")
-#define RESET  (isatty(STDOUT_FILENO) ? "\x1b[0m" : "")
+static const char *ansi(const char *code) {
+    return isatty(STDOUT_FILENO) ? code : "";
+}
+
+#define RED    ansi("\x1b[31m")
+#define GRN    ansi("\x1b[32m")
+#define YEL    ansi("\x1b[33m")
+#define BLU    ansi("\x1b[34m")
+#define MAG    ansi("\x1b[35m")
+#define CYN    ansi("\x1b[36m")
+#define BOLD   ansi("\x1b[1m")
+#define RESET  ansi("\x1b[0m")
 
 #define PMV_VERSION "1.0.0"
 
@@ -38,9 +42,9 @@ void print_separator(void) {
 
 void print_header(void) {
     if (quiet_mode) return;
-    printf(BOLD CYN "==========================================================================================\n");
+    printf("%s%s==========================================================================================\n", BOLD, CYN);
     printf("  PMV - Process Mitigation Viewer\n");
-    printf("==========================================================================================\n" RESET);
+    printf("==========================================================================================\n%s", RESET);
 }
 
 static void export_json_manual(const ProcessInfo *processes, int count, const char *filename) {
@@ -182,7 +186,7 @@ static ProcessInfo *load_snapshot(int *count) {
 
 static void print_diff(const ProcessInfo *oldp, int oldc, const ProcessInfo *newp, int newc) {
     int changes = 0;
-    printf("\n" BOLD "[+] CHANGES FROM LAST SNAPSHOT\n" RESET);
+    printf("\n%s[+] CHANGES FROM LAST SNAPSHOT\n%s", BOLD, RESET);
     printf("%-6s  %-7s %-7s %-7s  %s\n", "PID", "PLEDGE", "UNVEIL", "W^X", "PROCESS / NOTE");
     for (int i = 0; i < newc; i++) {
         int found = 0;
@@ -282,8 +286,8 @@ int main(int argc, char *argv[]) {
     if (unveil(".", "rwc") == -1 || unveil("/dev", "r") == -1 || unveil(NULL, NULL) == -1) err(1, "unveil");
     if (pledge("stdio rpath wpath cpath ps vminfo unveil", NULL) == -1) err(1, "pledge");
     if (out_format == NONE && !quiet_mode) {
-        if (target_pid > 0) printf("\n" BOLD "[+] Filtered PID %d\n" RESET, target_pid);
-        printf("\n" BOLD "%-8s %-6s %-22s %-22s %-7s %-7s %-7s %-6s\n" RESET, "PID", "PPID", "PROCESS", "PARENT", "PLEDGE", "UNVEIL", "W^X", "SCORE");
+        if (target_pid > 0) printf("\n%s[+] Filtered PID %d\n%s", BOLD, target_pid, RESET);
+        printf("\n%s%-8s %-6s %-22s %-22s %-7s %-7s %-7s %-6s\n%s", BOLD, "PID", "PPID", "PROCESS", "PARENT", "PLEDGE", "UNVEIL", "W^X", "SCORE", RESET);
         print_separator();
     }
     int pledged_count = 0, unveiled_count = 0, chroot_count = 0, wx_count = 0, score_sum = 0, score_max = -999, score_min = 999;
@@ -292,15 +296,21 @@ int main(int argc, char *argv[]) {
         if (p->has_pledge) pledged_count++; if (p->has_unveil) unveiled_count++; if (p->chrooted) chroot_count++; if (p->wxneeded) wx_count++;
         score_sum += p->score; if (p->score > score_max) score_max = p->score; if (p->score < score_min) score_min = p->score;
         if (out_format == NONE && !quiet_mode) {
-            char *ctx_color = (p->pid < 100) ? MAG : BLU;
-            printf("%s%-8d" RESET " %-6d %-22.22s %-22.22s %s%-7s" RESET " %s%-7s" RESET " %s%-7s" RESET " %s%-6d" RESET "\n", ctx_color, p->pid, p->ppid, p->name, p->ppname, p->has_pledge ? GRN : RED, p->has_pledge ? "PRESENT" : "NONE", p->has_unveil ? GRN : YEL, p->has_unveil ? "PRESENT" : "NONE", p->wxneeded ? RED : GRN, p->wxneeded ? "W^X" : "ok", score_color(p->score), p->score);
+            const char *ctx_color = (p->pid < 100) ? MAG : BLU;
+            printf("%s%-8d%s %-6d %-22.22s %-22.22s %s%-7s%s %s%-7s%s %s%-7s%s %s%-6d%s\n",
+                ctx_color, p->pid, RESET,
+                p->ppid, p->name, p->ppname,
+                p->has_pledge ? GRN : RED, p->has_pledge ? "PRESENT" : "NONE", RESET,
+                p->has_unveil ? GRN : YEL, p->has_unveil ? "PRESENT" : "NONE", RESET,
+                p->wxneeded ? RED : GRN, p->wxneeded ? "W^X" : "ok", RESET,
+                score_color(p->score), p->score, RESET);
             if ((i + 1) % 20 == 0 && (i + 1) < display_count && isatty(STDIN_FILENO)) { getchar(); }
         }
     }
     if (out_format == NONE && diff_mode && oldp) { print_diff(oldp, oldp_count, display_list, display_count); free(oldp); }
     if (out_format == NONE && !quiet_mode) {
         print_separator();
-        printf("\n" BOLD "[+] MITIGATION SUMMARY\n" RESET "    [#] Total: %d\n    [#] Pledge: %d\n    [#] Unveil: %d\n    [#] W^X Violations: %d\n", display_count, pledged_count, unveiled_count, wx_count);
+        printf("\n%s[+] MITIGATION SUMMARY\n%s    [#] Total: %d\n    [#] Pledge: %d\n    [#] Unveil: %d\n    [#] W^X Violations: %d\n", BOLD, RESET, display_count, pledged_count, unveiled_count, wx_count);
     }
     if (out_format == JSON) export_json_manual(display_list, display_count, quiet_mode ? "output.json" : NULL);
     if (out_format == CSV) export_csv(display_list, display_count, quiet_mode ? "output.csv" : NULL);
