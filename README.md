@@ -26,7 +26,7 @@ W^X state per process via `libkvm(3)`.
 
 PMV reads kernel-exposed process metadata through `libkvm(3)` and `struct
 kinfo_proc` to report whether active processes use `pledge(2)`, `unveil(2)`,
-and W^X policy. It is a viewer, not an auditor, scanner, or vulnerability
+and W^X state. It is a viewer, not an auditor, scanner, or vulnerability
 finder.
 
 All classification comes from kernel-reported state. PMV does not perform
