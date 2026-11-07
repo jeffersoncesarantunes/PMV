@@ -1,4 +1,5 @@
 #include "pmv.h"
+#include "colors.h"
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,19 +10,6 @@
 #include <errno.h>
 #include <ctype.h>
 
-static const char *ansi(const char *code) {
-    return isatty(STDOUT_FILENO) ? code : "";
-}
-
-#define RED    ansi("\x1b[31m")
-#define GRN    ansi("\x1b[32m")
-#define YEL    ansi("\x1b[33m")
-#define BLU    ansi("\x1b[34m")
-#define MAG    ansi("\x1b[35m")
-#define CYN    ansi("\x1b[36m")
-#define BOLD   ansi("\x1b[1m")
-#define RESET  ansi("\x1b[0m")
-
 #define PMV_VERSION "development"
 
 #define SNAPSHOT_FILE ".pmv_snapshot"
@@ -30,9 +18,9 @@ enum OutputFormat { NONE, JSON, CSV };
 int quiet_mode = 0;
 
 static const char *score_color(int score) {
-    if (score >= 4) return GRN;
-    if (score >= 1) return YEL;
-    return RED;
+    if (score >= 4) return CLR_GREEN;
+    if (score >= 1) return CLR_YELLOW;
+    return CLR_RED;
 }
 
 void print_separator(void) {
@@ -42,9 +30,9 @@ void print_separator(void) {
 
 void print_header(void) {
     if (quiet_mode) return;
-    printf("%s%s==========================================================================================\n", BOLD, CYN);
+    printf("%s%s==========================================================================================\n", CLR_BOLD, CLR_CYAN);
     printf("  PMV - Process Mitigation Viewer\n");
-    printf("==========================================================================================\n%s", RESET);
+    printf("==========================================================================================\n%s", CLR_RESET);
 }
 
 static void export_json_manual(const ProcessInfo *processes, int count, const char *filename) {
@@ -259,7 +247,7 @@ int main(int argc, char *argv[]) {
         }
     }
     if (target_wx_pid > 0) { audit_process_memory(target_wx_pid); return 0; }
-    if (out_format == NONE) { print_header(); if (!quiet_mode) audit_self(); }
+    if (out_format == NONE) { print_header(); }
     int count = 0;
     ProcessInfo *processes = get_all_processes(&count);
     if (!processes) errx(1, "Could not fetch processes");
@@ -296,14 +284,14 @@ int main(int argc, char *argv[]) {
         if (p->has_unveil) unveiled_count++;
         if (p->chrooted) chroot_count++;
         if (out_format == NONE && !quiet_mode) {
-            const char *ctx_color = (p->pid < 100) ? MAG : BLU;
+            const char *ctx_color = (p->pid < 100) ? CLR_MAGENTA : CLR_BLUE;
             printf("%s%-8d%s %-6d %-22.22s %-22.22s %s%-7s%s %s%-7s%s %s%-7s%s %s%-6d%s\n",
-                ctx_color, p->pid, RESET,
+                ctx_color, p->pid, CLR_RESET,
                 p->ppid, p->name, p->ppname,
-                p->has_pledge ? GRN : RED, p->has_pledge ? "PRESENT" : "NONE", RESET,
-                p->has_unveil ? GRN : YEL, p->has_unveil ? "PRESENT" : "NONE", RESET,
-                p->chrooted ? GRN : YEL, p->chrooted ? "CHROOT" : "no", RESET,
-                score_color(p->score), p->score, RESET);
+                p->has_pledge ? CLR_GREEN : CLR_RED, p->has_pledge ? "PRESENT" : "NONE", CLR_RESET,
+                p->has_unveil ? CLR_GREEN : CLR_YELLOW, p->has_unveil ? "PRESENT" : "NONE", CLR_RESET,
+                p->chrooted ? CLR_GREEN : CLR_YELLOW, p->chrooted ? "CHROOT" : "no", CLR_RESET,
+                score_color(p->score), p->score, CLR_RESET);
             if ((i + 1) % 20 == 0 && (i + 1) < display_count && isatty(STDIN_FILENO)) { getchar(); }
         }
     }

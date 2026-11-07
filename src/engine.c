@@ -142,7 +142,3 @@ void audit_process_memory(int pid) {
 
     free(vme);
 }
-
-void audit_self(void) {
-    audit_process_memory(getpid());
-}

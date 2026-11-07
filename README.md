@@ -76,20 +76,19 @@ the privileges used to run PMV.
 
 ## Security scoring
 
-Each process receives a score from **-2 to 6**:
+Each process receives a score from **0 to 6**:
 
 | Criteria | Value |
 | :------- | :---: |
 | `pledge(2)` called | +3 |
 | `unveil(2)` called | +2 |
 | `chroot` jail | +1 |
-| W^X violation (WXNEEDED) | -2 |
 
 | Score | Meaning |
 | :---: | :------ |
 | 4 – 6 | Multiple mitigations detected |
 | 1 – 3 | Partial mitigation |
-| ≤ 0 | No mitigations detected |
+| 0 | No mitigations detected |
 
 ## OpenBSD limitations
 

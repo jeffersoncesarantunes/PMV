@@ -24,6 +24,5 @@ void pmv_csv_field(FILE *f, const char *s);
 int pmv_snapshot_encode(const char *in, char *out, size_t outsz);
 int pmv_snapshot_decode(const char *in, char *out, size_t outsz);
 void audit_process_memory(int pid);
-void audit_self(void);
 
 #endif
