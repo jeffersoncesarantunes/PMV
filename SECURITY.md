@@ -10,7 +10,7 @@
 
 This is an OpenBSD process mitigation visibility tool. If you discover a security vulnerability, please do NOT open a public issue.
 
-Contact the maintainer directly at jefferson.antunes@gmail.com with details about the issue.
+Contact the maintainer directly at antunes@gmx.us with details about the issue.
 
 We commit to acknowledging receipt within 48 hours and providing a fix timeline within 7 days.
 
