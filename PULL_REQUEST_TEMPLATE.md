@@ -1,39 +1,39 @@
-## Descrição
+## Description
 
-Descreva clara e concisamente o que este PR faz.
+Describe clearly and concisely what this PR does.
 
-## Motivação / Contexto
+## Motivation / Context
 
-Qual problema este PR resolve? Relacionado a alguma issue?
+What problem does this PR solve? Related to any issue?
 
-## Tipo de mudança
+## Type of change
 
-Marque as opções relevantes:
+Check the relevant options:
 
-- [ ] Correção de bug (bug fix que não altera funcionalidade existente)
-- [ ] Nova funcionalidade (feature que adiciona funcionalidade)
-- [ ] Documentação (alteração apenas na documentação)
-- [ ] Refatoração (refatoração de código existente sem mudar comportamento)
-- [ ] Teste (adicionando ou corrigindo testes)
-- [ ] CI / Build (alterações em arquivos de CI ou build)
+- [ ] Bug fix (bug fix that doesn't change existing functionality)
+- [ ] New feature (feature that adds functionality)
+- [ ] Documentation (documentation-only changes)
+- [ ] Refactor (refactoring existing code without changing behavior)
+- [ ] Test (adding or fixing tests)
+- [ ] CI / Build (changes to CI or build files)
 
-## Como foi testado
+## How it was tested
 
-Descreva como você testou suas mudanças. Inclua comandos executados e resultados.
+Describe how you tested your changes. Include commands run and results.
 
-- [ ] `make test` passou
-- [ ] `make verify` passou (OpenBSD, apenas PMV)
-- [ ] Testes manuais realizados
+- [ ] `make test` passed
+- [ ] `make verify` passed (OpenBSD, PMV only)
+- [ ] Manual tests performed
 
 ## Checklist
 
-- [ ] Meu código segue o estilo de contribuição deste repositório
-- [ ] Executei `clang-format -i` nos arquivos alterados
-- [ ] Não há novas warnings de compilador
-- [ ] Atualizei a documentação relevante (README, docs)
-- [ ] Adicionei ou atualizei testes para cobrir minha mudança
-- [ ] Meu commit segue o formato de Commits Convencionais
+- [ ] My code follows this repository's contribution style
+- [ ] I ran `clang-format -i` on changed files
+- [ ] No new compiler warnings
+- [ ] I updated relevant documentation (README, docs)
+- [ ] I added or updated tests covering my change
+- [ ] My commit follows Conventional Commits format
 
-## Contexto adicional
+## Additional context
 
-Adicione qualquer outro contexto sobre o PR aqui.
+Add any other context about the PR here.

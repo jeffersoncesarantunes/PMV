@@ -6,22 +6,22 @@ labels: security
 assignees: jeffersoncesarantunes
 ---
 
-## ⚠️ Não abra problemas públicos para vulnerabilidades de segurança
+## ⚠️ Do not open public issues for security vulnerabilities
 
-Por favor, consulte nosso [política de divulgação de segurança](SECURITY.md) para instruções sobre como relatar vulnerabilidades de segurança de forma responsável.
+Please see our [security disclosure policy](SECURITY.md) for instructions on how to report security vulnerabilities responsibly.
 
-## Resumo
+## Summary
 
-Forneça um resumo claro e conciso da vulnerabilidade.
+Provide a clear and concise summary of the vulnerability.
 
-## Impacto
+## Impact
 
-Qual é o impacto potencial desta vulnerabilidade?
+What is the potential impact of this vulnerability?
 
-## Passos para reproduzir (se aplicável)
+## Steps to reproduce (if applicable)
 
-Descreva como reproduzir o problema, se aplicável.
+Describe how to reproduce the problem, if applicable.
 
-## Contexto adicional
+## Additional context
 
-Adicione qualquer outro contexto aqui.
+Add any other context here.

@@ -6,18 +6,18 @@ labels: enhancement
 assignees: jeffersoncesarantunes
 ---
 
-## Sua solicitação de recurso
+## Your feature request
 
-Descreva clara e concisamente o recurso que você gostaria de ver.
+Describe clearly and concisely the feature you'd like to see.
 
-## Motivação
+## Motivation
 
-Qual problema este recurso resolve? Por que é útil para PMV?
+What problem does this feature solve? Why is it useful for PMV?
 
-## Alternativas consideradas
+## Alternatives considered
 
-Descreva qualquer alternativa ou solução alternativa que você já considerou.
+Describe any alternatives or workarounds you've already considered.
 
-## Contexto adicional
+## Additional context
 
-Adicione qualquer outro contexto ou capturas de tela sobre a solicitação de recurso aqui.
+Add any other context or screenshots about the feature request here.

@@ -6,31 +6,31 @@ labels: bug
 assignees: jeffersoncesarantunes
 ---
 
-## Descrição do bug
+## Bug description
 
-Descreva clara e concisamente o que está acontecendo de errado.
+Describe clearly and concisely what's going wrong.
 
-## Para reproduzir
+## To reproduce
 
-Passos para reproduzir o comportamento:
+Steps to reproduce the behavior:
 1. `doas ./pmv ...`
 2. ...
-3. Veja o erro
+3. See the error
 
-## Comportamento esperado
+## Expected behavior
 
-Descreva o que você esperava que acontecesse.
+Describe what you expected to happen.
 
-## Ambiente
+## Environment
 
-* OpenBSD versão: [ex. 8.0]
-* PMV versão/commit: [ex. main / abc123]
-* Arquitetura: [ex. amd64]
+* OpenBSD version: [e.g. 8.0]
+* PMV version/commit: [e.g. main / abc123]
+* Architecture: [e.g. amd64]
 
-## Logs / saída
+## Logs / output
 
-Cole aqui qualquer saída relevante ou mensagens de erro.
+Paste any relevant output or error messages here.
 
-## Contexto adicional
+## Additional context
 
-Adicione qualquer outro contexto sobre o problema aqui.
+Add any other context about the problem here.
