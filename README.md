@@ -71,11 +71,6 @@ PMV needs `libkvm` and elevated privileges to access kernel memory. Run it with 
 | `--format json\|csv` | Structured export |
 | `--quiet` | Suppresses non-essential output |
 
-## Mirroring
-
-This project is mirrored on Codeberg so it doesn't depend on a single platform:
-https://codeberg.org/jeffersoncesarantunes/PMV
-
 ## OpenBSD limitations
 
 The kernel exposes just a boolean for `pledge(2)` and `unveil(2)` — presence or absence. Specific promises and paths aren't available to userland. PMV reports what the kernel provides and doesn't pretend otherwise.
