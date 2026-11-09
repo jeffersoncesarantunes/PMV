@@ -45,6 +45,14 @@ PID      PPID   PROCESS                PARENT                 PLEDGE  UNVEIL  W^
 
 `PRESENT` confirma que a mitigação foi chamada — não diz qual política nem escopo. PIDs, nomes e pontuações variam conforme o sistema e os privilégios usados.
 
+## Project in Action
+
+![System Scan](./Images/pmv-runtime-scan-v2.png)
+
+![PID Filter](./Images/pmv-pid-filter-v2.png)
+
+![Diff Audit](./Images/pmv-diff-audit-v2.png)
+
 ## Como construir e usar
 
 ```bash
