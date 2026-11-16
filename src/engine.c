@@ -26,7 +26,10 @@ ProcessInfo* get_all_processes(int *count) {
     int nprocs;
 
     kd = kvm_openfiles(NULL, NULL, NULL, KVM_NO_FILES, errbuf);
-    if (kd == NULL) return NULL;
+    if (kd == NULL) {
+        warnx("kvm_openfiles failed: %s", errbuf);
+        return NULL;
+    }
 
     kp = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &nprocs);
     if (kp == NULL) {
@@ -47,6 +50,7 @@ ProcessInfo* get_all_processes(int *count) {
         list[i].has_pledge = (kp[i].p_psflags & PS_PLEDGE) ? 1 : 0;
         list[i].has_unveil = (kp[i].p_eflag & EPROC_UNVEIL) ? 1 : 0;
         list[i].chrooted = (kp[i].p_psflags & PS_CHROOT) ? 1 : 0;
+        list[i].wxneeded = (kp[i].p_psflags & PS_WXNEEDED) ? 1 : 0;
     }
 
     for (int i = 0; i < nprocs; i++) {

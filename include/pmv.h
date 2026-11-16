@@ -13,6 +13,7 @@ typedef struct {
     int has_pledge;
     int has_unveil;
     int chrooted;
+    int wxneeded;
     int score;
 } ProcessInfo;
 

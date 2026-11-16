@@ -1,6 +1,6 @@
 CC = cc
 CFLAGS = -Wall -Wextra -O2 -fstack-protector-strong -D_FORTIFY_SOURCE=2 -fPIE -I./include -I/usr/local/include
-LDFLAGS = -lkvm -pie -Wl,-z,relro,-z,now -Wl,-z,noexecstack
+LDFLAGS = -lkvm -lcrypto -pie -Wl,-z,relro,-z,now -Wl,-z,noexecstack
 TARGET = pmv
 SRC = src/main.c src/engine.c src/score.c src/util.c
 PREFIX ?= /usr/local
@@ -15,6 +15,12 @@ all: $(TARGET)
 $(TARGET): $(SRC) include/pmv.h
 	@$(CC) $(CFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
 	@strip $(TARGET)
+
+debug: CFLAGS += -O0 -g -DDEBUG
+debug: LDFLAGS += -O0 -g
+debug: $(SRC) include/pmv.h
+	@$(CC) $(CFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
+	@echo "🐛 Debug build (no strip) complete!"
 
 install: all install-man
 	@install -m 755 -o root -g wheel $(TARGET) $(BINDIR)/pmv
